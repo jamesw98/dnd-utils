@@ -4,6 +4,8 @@ namespace dnd_utils.Services;
 
 public class MonsterService
 {
+    private Random _rand = new();
+    
     public List<Monster> GenerateMonsters(string name, int number, int passive, int initMod, int ac, int hitDieType, 
         int hitDieNum, int hitDieMod)
     {
@@ -24,7 +26,8 @@ public class MonsterService
         }
 
         result = result.OrderByDescending(x => x.Initiative).ToList();
-
+        
+        
         var count = 1;
         foreach (var r in result)
             r.Name = name + count++; 
@@ -34,11 +37,10 @@ public class MonsterService
 
     private int Roll(int num, int type, int mod)
     {
-        Random rand = new();
         var result = 0;
 
         for (var i = 0; i < num; i++)
-            result += rand.Next(type);
+            result += _rand.Next(type);
 
         return result + mod;
     }

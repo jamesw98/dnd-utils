@@ -1,13 +1,13 @@
 ﻿@inherits LayoutComponentBase
 
 <MudThemeProvider IsDarkMode="true"/>
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        My Application
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())"/>
+        D&D Utilities
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen">
         <NavMenu/>
@@ -24,4 +24,5 @@
     {
         _drawerOpen = !_drawerOpen;
     }
+
 }

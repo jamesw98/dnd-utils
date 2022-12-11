@@ -4,6 +4,13 @@
 @inject MonsterService MonsterService
 
 <MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2">
+        D&D Multi-Monster Info Generator
+    </MudText>
+    
+</MudContainer>
+<br/>
+<MudContainer MaxWidth="MaxWidth.Large">
     <MudGrid>
         <MudItem xs="12" sm="7">
             <MudPaper Class="pa-4">
@@ -23,16 +30,20 @@
                     </div>
                     <br/>
                     <div class="d-flex">
-                        <MudTextField T="int" Label="HitDieType" Required="true" RequiredError="Hit die type is required!" @ref="_hitDieType"/>
-                        <MudSpacer/>
                         <MudTextField T="int" Label="HitDieNum" Required="true" RequiredError="Number of hit die is required!" @ref="_hitDieNum"/>
+                        <MudSpacer/>
+                        <MudTextField T="int" Label="HitDieType" Required="true" RequiredError="Hit die type is required!" @ref="_hitDieType"/>
                         <MudSpacer/>
                         <MudTextField T="int" Label="HitDieMod" Required="true" RequiredError="Hit die mod is required!" @ref="_hitDieMod"/>
                     </div>
                 </MudForm>
             </MudPaper>
             <MudPaper Class="pa-4 mt-4">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GetMonsters">Generate!</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Draw" OnClick="GetMonsters">Generate!</MudButton>
+                <MudTooltip Text="Coming soon!">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="true">Download CSV</MudButton>    
+                </MudTooltip>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Warning" OnClick="ClearMonsters">Clear</MudButton>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="5">
@@ -60,7 +71,7 @@
 
 @code {
     MudForm form;
-    
+
     private MudTextField<string> _name;
     private MudTextField<int> _number;
     private MudTextField<int> _initMod;
@@ -75,12 +86,23 @@
     private void GetMonsters()
     {
         if (ValidateInput())
-            _monsters = MonsterService.GenerateMonsters(_name.Value, _number.Value, _passive.Value, _initMod.Value, 
+            _monsters = MonsterService.GenerateMonsters(_name.Value, _number.Value, _passive.Value, _initMod.Value,
                 _ac.Value, _hitDieType.Value, _hitDieNum.Value, _hitDieMod.Value);
+    }
+
+    private void DownloadCsv()
+    {
+        
+    }
+
+    private void ClearMonsters()
+    {
+        _monsters.Clear();
     }
 
     private bool ValidateInput()
     {
         return _name.Value != null;
     }
+
 }

@@ -7,6 +7,13 @@
     <MudText Typo="Typo.h2">
         D&D Multi-Monster Info Generator
     </MudText>
+    <MudDivider/>
+    <MudText Typo="Typo.body1">
+        Are you tired of manually rolling all 30 of those pesky goblin's initiatives? Want to switch it up and have their HP be randomized instead of just using what's in the book?
+    </MudText>
+    <MudText Typo="Typo.body1">
+        This tool gets rid of all the hastle! Just fill out the information, and it'll shoot out a list of creatures with randomized initiative and HP (sorted by initiative, decending).
+    </MudText>
 </MudContainer>
 <br/>
 <MudContainer MaxWidth="MaxWidth.Large">
@@ -40,7 +47,7 @@
             <MudPaper Class="pa-4 mt-4">
                 <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Draw" OnClick="GetMonsters">Generate!</MudButton>
                 <MudTooltip Text="Coming soon!">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="true">Download CSV</MudButton>    
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="true">Download CSV</MudButton>
                 </MudTooltip>
                 <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Error" OnClick="ClearMonsters">Clear</MudButton>
             </MudPaper>

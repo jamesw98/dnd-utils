@@ -4,7 +4,12 @@ namespace dnd_utils.Services;
 
 public class MonsterService
 {
-    private Random _rand = new();
+    private DiceService _dice;
+
+    public MonsterService(DiceService dice)
+    {
+        _dice = dice;
+    }
     
     public List<Monster> GenerateMonsters(string name, int number, int passive, int initMod, int ac, int hitDieType, 
         int hitDieNum, int hitDieMod)
@@ -13,8 +18,8 @@ public class MonsterService
 
         for (int i = 0; i < number; i++)
         {
-            var init = Roll(1, 20, initMod);
-            var hp = Roll(hitDieNum, hitDieType, hitDieMod);
+            var init = _dice.Roll(1, 20, initMod);
+            var hp = _dice.Roll(hitDieNum, hitDieType, hitDieMod);
             
             result.Add(new Monster
             {
@@ -27,21 +32,10 @@ public class MonsterService
 
         result = result.OrderByDescending(x => x.Initiative).ToList();
         
-        
         var count = 1;
         foreach (var r in result)
             r.Name = name + count++; 
 
         return result;
-    }
-
-    private int Roll(int num, int type, int mod)
-    {
-        var result = 0;
-
-        for (var i = 0; i < num; i++)
-            result += _rand.Next(type);
-
-        return result + mod;
     }
 }

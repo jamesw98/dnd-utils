@@ -7,7 +7,6 @@
     <MudText Typo="Typo.h2">
         D&D Multi-Monster Info Generator
     </MudText>
-    
 </MudContainer>
 <br/>
 <MudContainer MaxWidth="MaxWidth.Large">
@@ -43,7 +42,7 @@
                 <MudTooltip Text="Coming soon!">
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="true">Download CSV</MudButton>    
                 </MudTooltip>
-                <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Warning" OnClick="ClearMonsters">Clear</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Error" OnClick="ClearMonsters">Clear</MudButton>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="5">
@@ -92,7 +91,6 @@
 
     private void DownloadCsv()
     {
-        
     }
 
     private void ClearMonsters()

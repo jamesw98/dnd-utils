@@ -53,7 +53,7 @@ public class DiceService
         var result = 0;
 
         for (var i = 0; i < num; i++)
-            result += _rand.Next(type + 1);
+            result += _rand.Next(1, type + 1);
 
         return result + mod;
     }

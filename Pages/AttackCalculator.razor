@@ -8,6 +8,16 @@
     <MudText Typo="Typo.h2">
         D&D Attack Calculator
     </MudText>
+    <MudDivider/>
+    <MudText Typo="Typo.body1">
+        Ever needed to roll a bunch of attacks against a player's (or creature's) AC? Well, now you can!
+    </MudText>
+    <MudText Typo="Typo.body1">
+        Just fill out the fields below, check any of the options, and click "Roll!".
+    </MudText>
+    <MudText Typo="Typo.body1">
+        If you want to see details about a roll, click the info icon on the far right of the column.
+    </MudText>
 </MudContainer>
 <br/>
 <MudContainer MaxWidth="MaxWidth.Large">
@@ -38,6 +48,7 @@
                 <MudCheckBox @bind-Checked="@_hideMisses" Label="Hide Misses" Color="Color.Primary"></MudCheckBox>
                 <MudCheckBox @bind-Checked="@_advantage" Label="Advantage" Color="Color.Primary"></MudCheckBox>
                 <MudCheckBox @bind-Checked="@_disadvantage" Label="Disadvantage" Color="Color.Primary"></MudCheckBox>
+                <MudCheckBox @bind-Checked="@_autoCrit" Label="Auto-Crit" Color="Color.Primary"></MudCheckBox>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="5">
@@ -48,16 +59,16 @@
                         <MudTh>Hit?</MudTh>
                         <MudTh>Damage Roll</MudTh>
                         <MudTh>Crit?</MudTh>
-                        @* <MudTh>Info</MudTh> *@
+                        <MudTh>Info</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@context.AttackDetail.Total</MudTd>
                         <MudTd>@(context.Hit ? "Hit" : "Miss")</MudTd>
                         <MudTd>@context.Damange</MudTd>
                         <MudTd>@(context.Crit ? "Yes" : "No")</MudTd>
-                        @* <MudTd> *@
-                        @*     <MudIconButton Icon="@Icons.Material.Outlined.Info" aria-label="info"></MudIconButton> *@
-                        @* </MudTd> *@
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Info" aria-label="info" OnClick="async () => { await OnButtonClicked(context); }"></MudIconButton>
+                        </MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
@@ -76,8 +87,20 @@
     private bool _hideMisses;
     private bool _advantage;
     private bool _disadvantage;
+    private bool _autoCrit;
 
     private List<AttackResult> _attacks = new();
+    
+    [Inject] private IDialogService DialogService { get; set; }
+
+    private async Task OnButtonClicked(AttackResult ar)
+    {
+        await DialogService.ShowMessageBox(
+            "Attack Result Info", 
+            (MarkupString) $"<b>To hit:</b> <br /> {ar.AttackDetail} <br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}");
+        
+        StateHasChanged();
+    }
 
     private void CalcAttacks()
     {
@@ -106,7 +129,7 @@
             if (toHit.Total >= _ac.Value)
                 currentAttack.Hit = true;
 
-            if (toHit.Rolls.Contains(20))
+            if (_autoCrit || toHit.Rolls.Contains(20))
                 currentAttack.Crit = true;
 
             var diceNum = currentAttack.Crit ? _damageNum.Value * 2 : _damageNum.Value;

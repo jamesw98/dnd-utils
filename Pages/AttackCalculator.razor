@@ -6,7 +6,7 @@
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
-        D&D Melee Attack Calculator
+        D&D Attack Calculator
     </MudText>
 </MudContainer>
 <br/>
@@ -34,7 +34,7 @@
             </MudPaper>
             <MudPaper Class="pa-4 mt-4">
                 <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Refresh" OnClick="CalcAttacks">Roll!</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Error" OnClick="ClearAttacks">Clear</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Error" OnClick="ClearAttacks">Clear</MudButton>
                 <MudCheckBox @bind-Checked="@_hideMisses" Label="Hide Misses" Color="Color.Primary"></MudCheckBox>
                 <MudCheckBox @bind-Checked="@_advantage" Label="Advantage" Color="Color.Primary"></MudCheckBox>
                 <MudCheckBox @bind-Checked="@_disadvantage" Label="Disadvantage" Color="Color.Primary"></MudCheckBox>

@@ -12,7 +12,10 @@ public enum DamageType
     Psychic,
     Radiant,
     Thunder,
-    Bludgeoning,
-    Piercing,
-    Slashing
+    Bludgeoning_NonMagical,
+    Piercing_NonMagical,
+    Slashing_NonMagical,
+    Bludgeoning_Magical,
+    Piercing_Magical,
+    Slashing_Magical
 }

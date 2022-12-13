@@ -6,17 +6,17 @@ public class DiceService
 {
     private Random _rand = new();
 
-    public RollDetails? RollDetailedAdvantage(int num, int type, int mod)
+    public RollDetails? RollDetailedAdvantage(int num, int type, int mod, bool modOnEvery=false)
     {
-        return RollDetailsNonStandardStart(num, type, mod).MaxBy(x => x.Total);
+        return RollDetailsNonStandardStart(num, type, mod, modOnEvery).MaxBy(x => x.Total);
     }
     
-    public RollDetails? RollDetailedDisadvantage(int num, int type, int mod)
+    public RollDetails? RollDetailedDisadvantage(int num, int type, int mod, bool modOnEvery=false)
     {
-        return RollDetailsNonStandardStart(num, type, mod).MinBy(x => x.Total);
+        return RollDetailsNonStandardStart(num, type, mod, modOnEvery).MinBy(x => x.Total);
     }
 
-    private RollDetails?[] RollDetailsNonStandardStart(int num, int type, int mod)
+    private RollDetails?[] RollDetailsNonStandardStart(int num, int type, int mod, bool modOnEvery)
     {
         if (type != 20)
             throw new Exception("Advantage can only be used with d20s");
@@ -25,7 +25,7 @@ public class DiceService
         return rolls;
     }
     
-    public RollDetails RollDetailed(int num, int type, int mod)
+    public RollDetails RollDetailed(int num, int type, int mod, bool modOnEvery=false)
     {
         var total = 0;
         List<int> rolls = new();
@@ -36,7 +36,7 @@ public class DiceService
             rolls.Add(currentRoll);
         }
 
-        total += mod;
+        total += modOnEvery ? mod * num : mod;
 
         return new RollDetails
         {
@@ -48,13 +48,14 @@ public class DiceService
         };
     }
     
-    public int Roll(int num, int type, int mod)
+    public int Roll(int num, int type, int mod, bool modOnEvery=false)
     {
         var result = 0;
 
         for (var i = 0; i < num; i++)
             result += _rand.Next(1, type + 1);
 
-        return result + mod;
+        result += modOnEvery ? mod * num : mod;
+        return result;
     }
 }

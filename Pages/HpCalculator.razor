@@ -186,16 +186,15 @@
             {
                 Name = name,
                 HitPoints = _randomHealth ?
-                    DiceService.Roll(_hitDieNum.Value, _hitDieType.Value, _hitDieMod.Value, true) : _creatureHp.Value,
+                    DiceService.Roll(_hitDieNum.Value, _hitDieType.Value, _hitDieMod.Value) : _creatureHp.Value,
                 Resistances = _creatureResistances.ToList(),
                 Vulnerabilities = _creatureVulnerabilities.ToList(),
                 Immunities = _creatureImmunities.ToList()
             });
-
-            _creatureResistances = Enumerable.Empty<DamageType>();
-            _creatureVulnerabilities = Enumerable.Empty<DamageType>();
-            _creatureImmunities = Enumerable.Empty<DamageType>();
         }
+        _creatureResistances = Enumerable.Empty<DamageType>();
+        _creatureVulnerabilities = Enumerable.Empty<DamageType>();
+        _creatureImmunities = Enumerable.Empty<DamageType>();
     }
 
     private void Attack()

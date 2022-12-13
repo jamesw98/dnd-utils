@@ -17,30 +17,13 @@
 </MudContainer>
 <br/>
 
-@* <MudCard> *@
-@*     <MudCardHeader> *@
-@*         <CardHeaderContent> *@
-@*             <MudText Typo="Typo.h6">The Story Book</MudText> *@
-@*         </CardHeaderContent> *@
-@*         <CardHeaderActions> *@
-@*             <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" /> *@
-@*         </CardHeaderActions> *@
-@*     </MudCardHeader> *@
-@*     <MudCardContent> *@
-@*         <MudText>This day everything happend.</MudText> *@
-@*         <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText> *@
-@*     </MudCardContent> *@
-@*     <MudCardActions> *@
-@*         <MudButton Variant="Variant.Text" Color="Color.Primary">Read More</MudButton> *@
-@*     </MudCardActions> *@
-@* </MudCard> *@
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudGrid>
         <MudItem xs="12" sm="7">
             <MudPaper Class="pa-4">
                 <MudForm>
                     <div class="d-flex">
-                        <MudTextField T="int" Label="Damage" Required="true" RequiredError="Damage is required!"/>
+                        <MudTextField T="int" Label="Damage" Required="true" RequiredError="Damage is required!" @ref="_damage"/>
                         <MudSpacer/>
                         <MudSelect @bind-Value="_damageType" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
                             @foreach (var dt in _damageTypes)
@@ -71,9 +54,43 @@
             </MudPaper>
             <br/>
             <MudText Typo="Typo.h4">Optional</MudText>
-            <MudPaper>
+            <MudPaper Class="pa-4">
                 <MudCheckBox @bind-Checked="@_addResistances" Label="Use Resistances" Color="Color.Primary"/>
                 <MudSpacer/>
+                @if (_addResistances)
+                {
+                    <MudSelect @bind-SelectedValues="_creatureResistances" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+                        @foreach (var dt in _damageTypes)
+                        {
+                            <MudSelectItem T="DamageType" Value="@dt"/>
+                        }
+                    </MudSelect>
+                    <MudSpacer/>
+                }
+                <MudCheckBox @bind-Checked="@_addVulnerabilities" Label="Use Vulnerabilities" Color="Color.Primary"/>
+                <MudSpacer/>
+                @if (_addVulnerabilities)
+                {
+                    <MudSelect @bind-SelectedValues="_creatureVulnerabilities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+                        @foreach (var dt in _damageTypes)
+                        {
+                            <MudSelectItem T="DamageType" Value="@dt"/>
+                        }
+                    </MudSelect>
+                    <MudSpacer/>
+                }
+                <MudCheckBox @bind-Checked="@_addImmunities" Label="Use Immunities" Color="Color.Primary"/>
+                <MudSpacer/>
+                @if (_addImmunities)
+                {
+                    <MudSelect @bind-SelectedValues="_creatureImmunities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+                        @foreach (var dt in _damageTypes)
+                        {
+                            <MudSelectItem T="DamageType" Value="@dt"/>
+                        }
+                    </MudSelect>
+                    <MudSpacer/>
+                }
                 <MudCheckBox @bind-Checked="@_randomHealth" Label="Use Random Health" Color="Color.Primary"/>
                 <MudSpacer/>
                 <MudCheckBox @bind-Checked="@_createMultiple" Label="Create multiple" Color="Color.Primary"/>
@@ -86,7 +103,7 @@
                     <HeaderContent>
                         @if (_savingThrow)
                         {
-                            <MudTh>Passed</MudTh>    
+                            <MudTh>Passed</MudTh>
                         }
                         <MudTh>Name</MudTh>
                         <MudTh>HP</MudTh>
@@ -114,13 +131,15 @@
     private List<DamageType> _damageTypes = Enum.GetValues<DamageType>().ToList();
     private bool _savingThrow = false;
     private bool _addResistances = false;
+    private bool _addVulnerabilities = false;
+    private bool _addImmunities = false;
     private bool _randomHealth = false;
     private bool _createMultiple = false;
 
     private List<Monster> _creatures = new();
-    private List<DamageType> _creatureResistances = new();
-    private List<DamageType> _creatureVulnerabilities = new();
-    private List<DamageType> _creatureImmunities = new();
+    private IEnumerable<DamageType> _creatureResistances = new HashSet<DamageType>();
+    private IEnumerable<DamageType> _creatureVulnerabilities = new HashSet<DamageType>();
+    private IEnumerable<DamageType> _creatureImmunities = new HashSet<DamageType>();
 
     private MudTextField<int> _damage;
     private DamageType _damageType = DamageType.Acid;
@@ -134,10 +153,14 @@
         {
             Name = _creatureName.Value,
             HitPoints = _creatureHp.Value,
-            Resistances = _creatureResistances,
-            Vulnerabilities = _creatureVulnerabilities,
-            Immunities = _creatureImmunities
+            Resistances = _creatureResistances.ToList(),
+            Vulnerabilities = _creatureVulnerabilities.ToList(),
+            Immunities = _creatureImmunities.ToList()
         });
+
+        _creatureResistances = Enumerable.Empty<DamageType>();
+        _creatureVulnerabilities = Enumerable.Empty<DamageType>();
+        _creatureImmunities = Enumerable.Empty<DamageType>();
     }
 
     private void Attack()
@@ -146,11 +169,11 @@
         {
             if (c.Immunities.Contains(_damageType))
                 continue;
-            
+
             var currDamage = _damage.Value;
             if (c.PassedSavingThrow)
                 currDamage /= 2;
-                
+
             if (c.Resistances.Contains(_damageType))
                 currDamage /= 2;
 
@@ -158,6 +181,8 @@
                 currDamage *= 2;
 
             c.HitPoints -= currDamage;
+            if (c.HitPoints < 0)
+                c.HitPoints = 0;
         }
     }
 

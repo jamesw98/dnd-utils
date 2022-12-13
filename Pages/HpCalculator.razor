@@ -1,0 +1,164 @@
+﻿@page "/hp"
+@using dnd_utils.Enums
+@using dnd_utils.Models
+@using System.ComponentModel.Design.Serialization
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2">
+        D&D HP Tracker
+    </MudText>
+    <MudDivider/>
+    <MudText Typo="Typo.body1">
+        Have a bunch of players that just got hit by a Blue Dragon's lightning breath? Or maybe you just want to keep track of a bunch of monsters' hp.
+    </MudText>
+    <MudText Typo="Typo.body1">
+        This tool aims to help with that. You can add any number of creatures and modify their HP indivudually or in bulk.
+    </MudText>
+</MudContainer>
+<br/>
+
+@* <MudCard> *@
+@*     <MudCardHeader> *@
+@*         <CardHeaderContent> *@
+@*             <MudText Typo="Typo.h6">The Story Book</MudText> *@
+@*         </CardHeaderContent> *@
+@*         <CardHeaderActions> *@
+@*             <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" /> *@
+@*         </CardHeaderActions> *@
+@*     </MudCardHeader> *@
+@*     <MudCardContent> *@
+@*         <MudText>This day everything happend.</MudText> *@
+@*         <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText> *@
+@*     </MudCardContent> *@
+@*     <MudCardActions> *@
+@*         <MudButton Variant="Variant.Text" Color="Color.Primary">Read More</MudButton> *@
+@*     </MudCardActions> *@
+@* </MudCard> *@
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <MudPaper Class="pa-4">
+                <MudForm>
+                    <div class="d-flex">
+                        <MudTextField T="int" Label="Damage" Required="true" RequiredError="Damage is required!"/>
+                        <MudSpacer/>
+                        <MudSelect @bind-Value="_damageType" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+                            @foreach (var dt in _damageTypes)
+                            {
+                                <MudSelectItem T="DamageType" Value="@dt"/>
+                            }
+                        </MudSelect>
+                        <MudSpacer/>
+                        <MudCheckBox @bind-Checked="@_savingThrow" LabelPosition="LabelPosition.Start" Label="Saving Throw" Color="Color.Primary"/>
+                        <MudSpacer/>
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Bolt" OnClick="Attack">Attack!</MudButton>
+                        <MudSpacer/>
+                    </div>
+                    <br/>
+                </MudForm>
+            </MudPaper>
+            <br/>
+            <MudText Typo="Typo.h4">Add Creature</MudText>
+            <MudPaper Class="pa-4 mt-4">
+                <div class="d-flex">
+                    <MudTextField T="string" Label="Name" Required="true" RequiredError="Name is required!" @ref="_creatureName"/>
+                    <MudSpacer/>
+                    <MudTextField T="int" Label="HP" Required="true" RequiredError="HP is required!" @ref="_creatureHp"/>
+                    <MudSpacer/>
+                    <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Outlined.Add" aria-label="info" Color="Color.Success" Size="Size.Large" OnClick="AddCreature"/>
+                    <MudSpacer/>
+                </div>
+            </MudPaper>
+            <br/>
+            <MudText Typo="Typo.h4">Optional</MudText>
+            <MudPaper>
+                <MudCheckBox @bind-Checked="@_addResistances" Label="Use Resistances" Color="Color.Primary"/>
+                <MudSpacer/>
+                <MudCheckBox @bind-Checked="@_randomHealth" Label="Use Random Health" Color="Color.Primary"/>
+                <MudSpacer/>
+                <MudCheckBox @bind-Checked="@_createMultiple" Label="Create multiple" Color="Color.Primary"/>
+                <MudSpacer/>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="5">
+            <MudPaper Class="pa-4">
+                <MudTable Items="_creatures" Breakpoint="Breakpoint.Md">
+                    <HeaderContent>
+                        @if (_savingThrow)
+                        {
+                            <MudTh>Passed</MudTh>    
+                        }
+                        <MudTh>Name</MudTh>
+                        <MudTh>HP</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        @if (_savingThrow)
+                        {
+                            <MudTd>
+                                <MudCheckBox @bind-Checked="@context.PassedSavingThrow"/>
+                            </MudTd>
+                        }
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>@context.HitPoints</MudTd>
+                        @* <MudTd> *@
+                        @*     <MudIconButton Icon="@Icons.Material.Outlined.Info" aria-label="info" OnClick="async () => { await OnButtonClicked(context); }"></MudIconButton> *@
+                        @* </MudTd> *@
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<DamageType> _damageTypes = Enum.GetValues<DamageType>().ToList();
+    private bool _savingThrow = false;
+    private bool _addResistances = false;
+    private bool _randomHealth = false;
+    private bool _createMultiple = false;
+
+    private List<Monster> _creatures = new();
+    private List<DamageType> _creatureResistances = new();
+    private List<DamageType> _creatureVulnerabilities = new();
+    private List<DamageType> _creatureImmunities = new();
+
+    private MudTextField<int> _damage;
+    private DamageType _damageType = DamageType.Acid;
+
+    private MudTextField<string> _creatureName;
+    private MudTextField<int> _creatureHp;
+
+    private void AddCreature()
+    {
+        _creatures.Add(new Monster
+        {
+            Name = _creatureName.Value,
+            HitPoints = _creatureHp.Value,
+            Resistances = _creatureResistances,
+            Vulnerabilities = _creatureVulnerabilities,
+            Immunities = _creatureImmunities
+        });
+    }
+
+    private void Attack()
+    {
+        foreach (var c in _creatures)
+        {
+            if (c.Immunities.Contains(_damageType))
+                continue;
+            
+            var currDamage = _damage.Value;
+            if (c.PassedSavingThrow)
+                currDamage /= 2;
+                
+            if (c.Resistances.Contains(_damageType))
+                currDamage /= 2;
+
+            if (c.Vulnerabilities.Contains(_damageType))
+                currDamage *= 2;
+
+            c.HitPoints -= currDamage;
+        }
+    }
+
+}

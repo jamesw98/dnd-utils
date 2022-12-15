@@ -1,4 +1,5 @@
-﻿using dnd_utils.Models;
+﻿using dnd_utils.Enums;
+using dnd_utils.Models;
 
 namespace dnd_utils.Services;
 
@@ -6,23 +7,19 @@ public class DiceService
 {
     private Random _rand = new();
 
-    public RollDetails? RollDetailedAdvantage(int num, int type, int mod, bool modOnEvery=false)
-    {
-        return RollDetailsNonStandardStart(num, type, mod, modOnEvery).MaxBy(x => x.Total);
-    }
-    
-    public RollDetails? RollDetailedDisadvantage(int num, int type, int mod, bool modOnEvery=false)
-    {
-        return RollDetailsNonStandardStart(num, type, mod, modOnEvery).MinBy(x => x.Total);
-    }
-
-    private RollDetails?[] RollDetailsNonStandardStart(int num, int type, int mod, bool modOnEvery)
+    public (RollDetails, RollDetails) RollDetailsNonStandard(int num, int type, int mod, AdvantageState state, bool modOnEvery=false)
     {
         if (type != 20)
-            throw new Exception("Advantage can only be used with d20s");
+            throw new Exception("(Dis)Advantage can only be used with d20s");
 
-        RollDetails?[] rolls = { RollDetailed(num, type, mod), RollDetailed(num, type, mod) };
-        return rolls;
+        List<RollDetails> rolls = new (new[] { RollDetailed(num, type, mod), RollDetailed(num, type, mod) });
+
+        if (state == AdvantageState.Advantage)
+            rolls = rolls.OrderByDescending(x => x.Total).ToList();
+        else 
+            rolls = rolls.OrderBy(x => x.Total).ToList();    
+        
+        return (rolls[0], rolls[1]);
     }
     
     public RollDetails RollDetailed(int num, int type, int mod, bool modOnEvery=false)

@@ -34,9 +34,7 @@
                             }
                         </MudSelect>
                         <MudSpacer/>
-                        <MudCheckBox @bind-Checked="@_savingThrow" LabelPosition="LabelPosition.Start" Label="Saving Throw" Color="Color.Primary"/>
-                        <MudSpacer/>
-                        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Bolt" OnClick="Attack">Attack!</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Bolt" OnClick="Attack">Attack!</MudButton>
                         <MudSpacer/>
                     </div>
                     <br/>
@@ -50,7 +48,7 @@
                     <MudSpacer/>
                     <MudTextField T="int" Label="HP" Required="true" Disabled="_randomHealth" RequiredError="HP is required!" @ref="_creatureHp"/>
                     <MudSpacer/>
-                    <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Outlined.Add" aria-label="info" Color="Color.Success" Size="Size.Large" OnClick="AddCreature"/>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Check" OnClick="AddCreature">Add</MudButton>
                     <MudSpacer/>
                 </div>
             </MudPaper>
@@ -111,10 +109,12 @@
                     <MudTextField T="int" Label="Number of Creatures" Required="true" RequiredError="Number of creatures is required!" @ref="_numberOfCreatures"/>
                     <MudSpacer/>
                 }
+                <MudSpacer/>
+                <MudCheckBox @bind-Checked="@_savingThrow" Label="Saving Throw" Color="Color.Primary"/>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="5">
-            <MudPaper Class="pa-4">
+            <MudPaper Class="pa-4 mud-height-full">
                 <MudTable Items="_creatures" Breakpoint="Breakpoint.Md">
                     <HeaderContent>
                         @if (_savingThrow)
@@ -151,7 +151,7 @@
     private bool _addImmunities = false;
     private bool _randomHealth = false;
     private bool _createMultiple = false;
-    
+
 
     private List<Monster> _creatures = new();
     private IEnumerable<DamageType> _creatureResistances = new HashSet<DamageType>();
@@ -167,7 +167,7 @@
     private MudTextField<int> _hitDieNum;
     private MudTextField<int> _hitDieType;
     private MudTextField<int> _hitDieMod;
-    
+
     private MudTextField<int> _numberOfCreatures;
 
     private void AddCreature()

@@ -1,8 +1,10 @@
 ﻿@page "/attack"
 @using dnd_utils.Services
 @using dnd_utils.Models
+@using dnd_utils.Exceptions
 
-@inject DiceService DiceService
+@inject ISnackbar Snackbar
+@inject AttackService AttackService
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
@@ -28,7 +30,7 @@
                     <div class="d-flex">
                         <MudTextField T="int" Label="Number of Attacks" Required="true" RequiredError="Number of attacks is required!" @ref="_attackNum"/>
                         <MudSpacer/>
-                        <MudTextField T="int" Label="To Hit Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_toHidMod"/>
+                        <MudTextField T="int" Label="To Hit Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_toHitMod"/>
                         <MudSpacer/>
                         <MudTextField T="int" Label="AC To Beat" Required="true" RequiredError="Hit die mod is required!" @ref="_ac"/>
                     </div>
@@ -44,11 +46,14 @@
             </MudPaper>
             <MudPaper Class="pa-4 mt-4">
                 <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Refresh" OnClick="CalcAttacks">Roll!</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Error" OnClick="ClearAttacks">Clear</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="ClearAttacks">Clear</MudButton>
+            </MudPaper>
+            <br/>
+            <MudText Typo="Typo.h4">Optional</MudText>
+            <MudPaper Class="pa-4 mt-4">
                 <MudCheckBox @bind-Checked="@_hideMisses" Label="Hide Misses" Color="Color.Primary"></MudCheckBox>
                 <MudCheckBox @bind-Checked="@_advantage" Label="Advantage" Color="Color.Primary"></MudCheckBox>
                 <MudCheckBox @bind-Checked="@_disadvantage" Label="Disadvantage" Color="Color.Primary"></MudCheckBox>
-                <MudCheckBox @bind-Checked="@_autoCrit" Label="Auto-Crit" Color="Color.Primary"></MudCheckBox>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="5">
@@ -78,7 +83,7 @@
 
 @code {
     private MudTextField<int> _attackNum;
-    private MudTextField<int> _toHidMod;
+    private MudTextField<int> _toHitMod;
     private MudTextField<int> _ac;
     private MudTextField<int> _damageNum;
     private MudTextField<int> _damageDie;
@@ -90,15 +95,20 @@
     private bool _autoCrit;
 
     private List<AttackResult> _attacks = new();
-    
-    [Inject] private IDialogService DialogService { get; set; }
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
 
     private async Task OnButtonClicked(AttackResult ar)
     {
-        await DialogService.ShowMessageBox(
-            "Attack Result Info", 
-            (MarkupString) $"<b>To hit:</b> <br /> {ar.AttackDetail} <br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}");
-        
+        var message = "";
+        if (ar.UnusedAttackDetail != null)
+            message = $"<b>To hit:</b> <br /> <u>{ar.AttackDetail}</u> <br />{ar.UnusedAttackDetail}<br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}";
+        else
+            message = $"<b>To hit:</b> <br /> {ar.AttackDetail} <br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}";
+
+        await DialogService.ShowMessageBox("Attack Result Info", (MarkupString)message);
+
         StateHasChanged();
     }
 
@@ -106,44 +116,26 @@
     {
         ClearAttacks();
 
-        for (var i = 0; i < _attackNum.Value; i++)
+        try
         {
-            var currentAttack = new AttackResult
-            {
-                AcToBeat = _ac.Value
-            };
+            var attacks = AttackService.CalculateAttackResults(
+                _attackNum.Value,
+                _toHitMod.Value,
+                _ac.Value,
+                _damageNum.Value,
+                _damageDie.Value,
+                _damageMod.Value,
+                _hideMisses,
+                _advantage,
+                _disadvantage,
+                _autoCrit);
 
-            RollDetails? toHit;
-            if (_advantage)
-                toHit = DiceService.RollDetailedAdvantage(1, 20, _toHidMod.Value);
-            else if (_disadvantage)
-                toHit = DiceService.RollDetailedDisadvantage(1, 20, _toHidMod.Value);
-            else
-                toHit = DiceService.RollDetailed(1, 20, _toHidMod.Value);
-
-            if (toHit == null)
-                throw new Exception("Illegal state");
-
-            currentAttack.AttackDetail = toHit;
-
-            if (toHit.Total >= _ac.Value)
-                currentAttack.Hit = true;
-
-            if (_autoCrit || toHit.Rolls.Contains(20))
-                currentAttack.Crit = true;
-
-            var diceNum = currentAttack.Crit ? _damageNum.Value * 2 : _damageNum.Value;
-
-            var damage = DiceService.RollDetailed(diceNum, _damageDie.Value, _damageMod.Value);
-
-            currentAttack.DamageDetail = damage;
-            currentAttack.Damange = damage.Total;
-            _attacks.Add(currentAttack);
+            _attacks.AddRange(attacks);
         }
-
-        _attacks = _attacks.OrderByDescending(x => x.AttackDetail.Total).ToList();
-        if (_hideMisses)
-            _attacks = _attacks.Where(x => x.Hit).ToList();
+        catch (IllegalStateException e)
+        {
+            Snackbar.Add(e.Message, Severity.Error);
+        }
     }
 
     private void ClearAttacks()

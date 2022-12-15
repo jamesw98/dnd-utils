@@ -1,7 +1,89 @@
 ﻿@page "/"
+@using System.Text.RegularExpressions
+@using System.Web
 
-<PageTitle>Index</PageTitle>
+<PageTitle>D&D Utils</PageTitle>
 
-<h1>Welcome to D&D Utilities</h1>
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2" Align="Align.Center">
+        Dungeon and Dragon's Utilities
+    </MudText>
+    <MudDivider/>
+    <br/>
+    <MudText Typo="Typo.h4" Align="Align.Center">
+        @((MarkupString)Regex.Replace(HttpUtility.HtmlEncode(_message), "\r?\n|\r", "<br />"))
+    </MudText>
+    <br/>
+    <MudDivider></MudDivider>
+    <br/>
+    <MudText Typo="Typo.h4">
+        <b>Who?</b>
+    </MudText>
+    <MudText Typo="Typo.body1">
+        I'm Jimmy, I'm a software engineer and massive D&D nerd. I'm primarily a backend engineer working on C# .NET products, which is why I chose Blazor WASM for this project.
+    </MudText>
+    <MudSpacer/>
+    <MudText Typo="Typo.body1">
+        Currently I'm the only code contributor, but I've gotten lots of great input from my D&D group. If you'd like to view the code, check it out <u><a href="https://github.com/jamesw98/dnd-utils">here</a></u>.
+    </MudText>
+    <MudSpacer/>
+    <MudText Typo="Typo.h4">
+        <b>What?</b>
+    </MudText>
+    <MudText Typo="Typo.body1">
+        This project is made to make DM-ing (and eventually playing) D&D easier. It helps automate a lot of the tedious tasks that come along with being a Dungeon Master.
+    </MudText>
+    <MudText Typo="Typo.body1">
+        Also, the quotes seen above on this page are from a long running campaign I'm in, there'll most likelly be new additions after every session :)
+    </MudText>
+    <MudSpacer/>
+    <MudText Typo="Typo.h4">
+        <b>Why?</b>
+    </MudText>
+    <MudText Typo="Typo.body1">
+        A DM friend asked if I could write a program that could help automate some DM tools he had in Excel. I wrote it in Python and thought "Huh, this could be a cool little web app".
+    </MudText>
+    <MudText Typo="Typo.body1">
+        I chose Blazor WASM since another major side project I'm working on is already using Blazor ServerSide, so this was reletively easy to pick up.
+    </MudText>
+</MudContainer>
 
-Check the nav bar on the left to see what utilities are available.
+@code {
+    private Random _random = new();
+    private string _message;
+
+    private string[] _quotes =
+    {
+        "\"Cockroaches are generally pretty wet\"\n -  DM",
+        "\"It's like sea world!\"\n -  Sandor, in reference to cockroaches jumping into sewer water",
+        "\"Chimpanzombi\"\n -  Icabod",
+        "\"Fuckin' Bangin' Investigators!\"\n -  Icabod",
+        "\"Part Skim, part Beeble\"\n -  Ed",
+        "\"Such a cute dog\"- DM, in reference to a player's cat",
+        "\"She has a big ass... greatsword\"\n - DM",
+        "\"I know the only way to defeat it, is to kill it\"\n -  Sandor",
+        "\"I call these... my Boots of Squeaky Boots\"\n -  Skim Beeble",
+        "\"I see no reason why not to trust this creepy interdimensional being\"\n -  Sandor",
+        "\"I think they (Rune's floors) are *squeaky* clean\"\n -  Icabod, the player with the Boots of Squeaky Boots",
+        "\"Is it safe to assume dragons don't have crumple zones?\"\n -  Sandor",
+        "\"Onlyfangs\"\n -  DM",
+        "\"I don't believe in dragons\"\n -  Ed, a dragonborn",
+        "\"I'm just a shitter and an eater\"\n - Gareb",
+        "\"Meth addicts can *move*\"\n -  DM",
+        "\"I'm a whore for castles\"\n -  Sandor",
+        "\"Ash? That's better than ass\"\n - Gareb",
+        "\"I think one of the upsides of drowning is that you don't die thirsty\"\n -  Sandor",
+        "\"Grape juice damage\"\n -  DM",
+        "\"You're an old ass bitch\"\n -  Sandor, to a dragon lord",
+        "\"He's not chaotic-suicidal\"\n -  DM",
+        "\"Remember, we're the good guys\"\n -  Gik, after beheading a pirate captain",
+        "\"I eat silverware\"\n -  Gik",
+        "\"I haven't killed anybody in 48 hours and I'm starting to shake\"\n - Gareb"
+    };
+
+    protected override void OnInitialized()
+    {
+        _message = _quotes[_random.Next(_quotes.Length)];
+    }
+
+}

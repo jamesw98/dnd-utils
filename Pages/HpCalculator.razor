@@ -17,7 +17,9 @@
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudGrid>
-        <HpInput Size="7" @bind-Creatures="_creatures" @bind-SavingThrow="@_savingThrow"/>
+        <MudItem xs="12" sm="7">
+            <HpInput @bind-Creatures="_creatures" @bind-SavingThrow="@_savingThrow" IncludeCreatureAdder="true"/>
+        </MudItem>
         <MudItem xs="12" sm="5">
             <MudPaper Class="pa-4 mud-height-full">
                 <MudTable Items="_creatures" Breakpoint="Breakpoint.Md">
@@ -46,7 +48,7 @@
 </MudContainer>
 
 @code {
-    
+
     private List<Monster> _creatures = new();
     private bool _savingThrow;
 

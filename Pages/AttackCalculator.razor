@@ -19,7 +19,9 @@
 <br/>
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudGrid>
-        <AttackInputs Size="7" @bind-Attacks="_attacks"/>
+        <MudItem xs="12" sm="7">
+            <AttackInputs @bind-Attacks="_attacks"/>    
+        </MudItem>        
         <MudItem xs="12" sm="5">
             <MudPaper Class="pa-4 mud-height-full">
                 <MudTable Items="_attacks" Breakpoint="Breakpoint.Md">

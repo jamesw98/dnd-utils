@@ -5,26 +5,27 @@
 
 @inject DiceService DiceService
 
-<MudItem xs="12" sm="@Size">
-    <MudPaper Class="pa-4">
-        <MudForm>
-            <div class="d-flex">
-                <MudTextField T="int" Label="Damage" Required="true" RequiredError="Damage is required!" @ref="_damage"/>
-                <MudSpacer/>
-                <MudSelect @bind-Value="_damageType" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
-                    @foreach (var dt in _damageTypes)
-                    {
-                        <MudSelectItem T="DamageType" Value="@dt"/>
-                    }
-                </MudSelect>
-                <MudSpacer/>
-                <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Bolt" OnClick="Attack">Attack!</MudButton>
-                <MudSpacer/>
-            </div>
-            <br/>
-        </MudForm>
-    </MudPaper>
-    <br/>
+<MudPaper Class="pa-4">
+    <MudForm>
+        <div class="d-flex">
+            <MudTextField T="int" Label="Damage" Required="true" RequiredError="Damage is required!" @ref="_damage"/>
+            <MudSpacer/>
+            <MudSelect @bind-Value="_damageType" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+                @foreach (var dt in _damageTypes)
+                {
+                    <MudSelectItem T="DamageType" Value="@dt"/>
+                }
+            </MudSelect>
+            <MudSpacer/>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Bolt" OnClick="Attack">Attack!</MudButton>
+            <MudSpacer/>
+        </div>
+        <br/>
+    </MudForm>
+</MudPaper>
+<br/>
+@if (IncludeCreatureAdder)
+{
     <MudText Typo="Typo.h4">Add Creature</MudText>
     <MudPaper Class="pa-4 mt-4">
         <div class="d-flex">
@@ -37,84 +38,84 @@
         </div>
     </MudPaper>
     <br/>
-    <MudText Typo="Typo.h4">Optional</MudText>
-    <MudPaper Class="pa-4">
-        <MudCheckBox @bind-Checked="@_addResistances" Label="Use Resistances" Color="Color.Primary"/>
+}
+<MudText Typo="Typo.h4">Optional</MudText>
+<MudPaper Class="pa-4">
+    <MudCheckBox @bind-Checked="@_addResistances" Label="Use Resistances" Color="Color.Primary"/>
+    <MudSpacer/>
+    @if (_addResistances)
+    {
+        <MudSelect @bind-SelectedValues="_creatureResistances" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+            @foreach (var dt in _damageTypes)
+            {
+                <MudSelectItem T="DamageType" Value="@dt"/>
+            }
+        </MudSelect>
         <MudSpacer/>
-        @if (_addResistances)
-        {
-            <MudSelect @bind-SelectedValues="_creatureResistances" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
-                @foreach (var dt in _damageTypes)
-                {
-                    <MudSelectItem T="DamageType" Value="@dt"/>
-                }
-            </MudSelect>
-            <MudSpacer/>
-        }
-        <MudCheckBox @bind-Checked="@_addVulnerabilities" Label="Use Vulnerabilities" Color="Color.Primary"/>
+    }
+    <MudCheckBox @bind-Checked="@_addVulnerabilities" Label="Use Vulnerabilities" Color="Color.Primary"/>
+    <MudSpacer/>
+    @if (_addVulnerabilities)
+    {
+        <MudSelect @bind-SelectedValues="_creatureVulnerabilities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+            @foreach (var dt in _damageTypes)
+            {
+                <MudSelectItem T="DamageType" Value="@dt"/>
+            }
+        </MudSelect>
         <MudSpacer/>
-        @if (_addVulnerabilities)
-        {
-            <MudSelect @bind-SelectedValues="_creatureVulnerabilities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
-                @foreach (var dt in _damageTypes)
-                {
-                    <MudSelectItem T="DamageType" Value="@dt"/>
-                }
-            </MudSelect>
-            <MudSpacer/>
-        }
-        <MudCheckBox @bind-Checked="@_addImmunities" Label="Use Immunities" Color="Color.Primary"/>
+    }
+    <MudCheckBox @bind-Checked="@_addImmunities" Label="Use Immunities" Color="Color.Primary"/>
+    <MudSpacer/>
+    @if (_addImmunities)
+    {
+        <MudSelect @bind-SelectedValues="_creatureImmunities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+            @foreach (var dt in _damageTypes)
+            {
+                <MudSelectItem T="DamageType" Value="@dt"/>
+            }
+        </MudSelect>
         <MudSpacer/>
-        @if (_addImmunities)
-        {
-            <MudSelect @bind-SelectedValues="_creatureImmunities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
-                @foreach (var dt in _damageTypes)
-                {
-                    <MudSelectItem T="DamageType" Value="@dt"/>
-                }
-            </MudSelect>
-            <MudSpacer/>
-        }
-        <MudCheckBox @bind-Checked="@_randomHealth" Label="Use Random Health" Color="Color.Primary"/>
+    }
+    <MudCheckBox @bind-Checked="@_randomHealth" Label="Use Random Health" Color="Color.Primary"/>
+    <MudSpacer/>
+    @if (_randomHealth)
+    {
+        <MudTextField T="int" Label="Hit Die Num" Required="true" RequiredError="Number of hit die is required!" @ref="_hitDieNum"/>
         <MudSpacer/>
-        @if (_randomHealth)
-        {
-            <MudTextField T="int" Label="Hit Die Num" Required="true" RequiredError="Number of hit die is required!" @ref="_hitDieNum"/>
-            <MudSpacer/>
-            <MudTextField T="int" Label="Hit Die Type" Required="true" RequiredError="Hit die type is required!" @ref="_hitDieType"/>
-            <MudSpacer/>
-            <MudTextField T="int" Label="Hit Die Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_hitDieMod"/>
-            <MudSpacer/>
-        }
-        <MudCheckBox @bind-Checked="@_createMultiple" Label="Create multiple" Color="Color.Primary"/>
+        <MudTextField T="int" Label="Hit Die Type" Required="true" RequiredError="Hit die type is required!" @ref="_hitDieType"/>
         <MudSpacer/>
-        @if (_createMultiple)
-        {
-            <MudTextField T="int" Label="Number of Creatures" Required="true" RequiredError="Number of creatures is required!" @ref="_numberOfCreatures"/>
-            <MudSpacer/>
-        }
+        <MudTextField T="int" Label="Hit Die Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_hitDieMod"/>
         <MudSpacer/>
-        <MudCheckBox T="bool" @oninput="InvokeSavingThrow" label="Use Saving Throws" Color="Color.Primary"/>
-    </MudPaper>
-</MudItem>
+    }
+    <MudCheckBox @bind-Checked="@_createMultiple" Label="Create multiple" Color="Color.Primary"/>
+    <MudSpacer/>
+    @if (_createMultiple)
+    {
+        <MudTextField T="int" Label="Number of Creatures" Required="true" RequiredError="Number of creatures is required!" @ref="_numberOfCreatures"/>
+        <MudSpacer/>
+    }
+    <MudSpacer/>
+    <MudCheckBox T="bool" @oninput="InvokeSavingThrow" label="Use Saving Throws" Color="Color.Primary"/>
+</MudPaper>
 
 @code {
-    
-    [Parameter]
-    public int Size { get; set; }
-    
+
     [Parameter]
     public List<Monster> Creatures { get; set; }
-    
+
     [Parameter]
     public EventCallback<List<Monster>> CreaturesChanged { get; set; }
 
     [Parameter]
     public bool SavingThrow { get; set; } = false;
-    
+
     [Parameter]
     public EventCallback<bool> SavingThrowChanged { get; set; }
     
+    [Parameter]
+    public bool IncludeCreatureAdder { get; set; }
+
     private List<DamageType> _damageTypes = Enum.GetValues<DamageType>().ToList();
     private bool _addResistances = false;
     private bool _addVulnerabilities = false;
@@ -125,7 +126,7 @@
     private IEnumerable<DamageType> _creatureResistances = new HashSet<DamageType>();
     private IEnumerable<DamageType> _creatureVulnerabilities = new HashSet<DamageType>();
     private IEnumerable<DamageType> _creatureImmunities = new HashSet<DamageType>();
-    
+
     private MudTextField<int> _damage;
     private DamageType _damageType = DamageType.Acid;
 
@@ -142,12 +143,12 @@
     {
         await CreaturesChanged.InvokeAsync(Creatures);
     }
-    
+
     private async Task InvokeSavingThrow()
     {
         await SavingThrowChanged.InvokeAsync(!SavingThrow);
     }
-    
+
     private async Task AddCreature()
     {
         var number = 1;
@@ -200,4 +201,5 @@
         }
         await InvokeCreatures();
     }
+
 }

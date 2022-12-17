@@ -5,50 +5,45 @@
 @inject AttackService AttackService
 @inject ISnackbar Snackbar
 
-<MudItem xs="12" sm="@Size">
-    <MudPaper Class="pa-8">
-        <MudForm>
-            <div class="d-flex">
-                <MudTextField T="int" Label="Number of Attacks" Required="true" RequiredError="Number of attacks is required!" @ref="_attackNum"/>
-                <MudSpacer/>
-                <MudTextField T="int" Label="To Hit Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_toHitMod"/>
-                <MudSpacer/>
-                <MudTextField T="int" Label="AC To Beat" Required="true" RequiredError="Hit die mod is required!" @ref="_ac"/>
-            </div>
-            <br/>
-            <div class="d-flex">
-                <MudTextField T="int" Label="Number of Damage Dice" Required="true" RequiredError="Number of attacks is required!" @ref="_damageNum"/>
-                <MudSpacer/>
-                <MudTextField T="int" Label="Damage Die" Required="true" RequiredError="Hit die mod is required!" @ref="_damageDie"/>
-                <MudSpacer/>
-                <MudTextField T="int" Label="Damage Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_damageMod"/>
-            </div>
-        </MudForm>
-    </MudPaper>
-    <MudPaper Class="pa-4 mt-4">
-        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Refresh" OnClick="CalcAttacks">Roll!</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="ClearAttacks">Clear</MudButton>
-    </MudPaper>
-    <br/>
-    <MudText Typo="Typo.h4">Optional</MudText>
-    <MudPaper Class="pa-4 mt-4">
-        <MudCheckBox @bind-Checked="@_hideMisses" Label="Hide Misses" Color="Color.Primary"></MudCheckBox>
-        <MudCheckBox @bind-Checked="@_advantage" Label="Advantage" Color="Color.Primary"></MudCheckBox>
-        <MudCheckBox @bind-Checked="@_disadvantage" Label="Disadvantage" Color="Color.Primary"></MudCheckBox>
-        <MudCheckBox @bind-Checked="@_autoCrit" Label="Auto-Crit" Color="Color.Primary"></MudCheckBox>
-    </MudPaper>
-</MudItem>
+<MudPaper Class="pa-8">
+    <MudForm>
+        <div class="d-flex">
+            <MudTextField T="int" Label="Number of Attacks" Required="true" RequiredError="Number of attacks is required!" @ref="_attackNum"/>
+            <MudSpacer/>
+            <MudTextField T="int" Label="To Hit Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_toHitMod"/>
+            <MudSpacer/>
+            <MudTextField T="int" Label="AC To Beat" Required="true" RequiredError="Hit die mod is required!" @ref="_ac"/>
+        </div>
+        <br/>
+        <div class="d-flex">
+            <MudTextField T="int" Label="Number of Damage Dice" Required="true" RequiredError="Number of attacks is required!" @ref="_damageNum"/>
+            <MudSpacer/>
+            <MudTextField T="int" Label="Damage Die" Required="true" RequiredError="Hit die mod is required!" @ref="_damageDie"/>
+            <MudSpacer/>
+            <MudTextField T="int" Label="Damage Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_damageMod"/>
+        </div>
+    </MudForm>
+</MudPaper>
+<MudPaper Class="pa-4 mt-4">
+    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Refresh" OnClick="CalcAttacks">Roll!</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="ClearAttacks">Clear</MudButton>
+</MudPaper>
+<br/>
+<MudText Typo="Typo.h4">Optional</MudText>
+<MudPaper Class="pa-4 mt-4">
+    <MudCheckBox @bind-Checked="@_hideMisses" Label="Hide Misses" Color="Color.Primary"></MudCheckBox>
+    <MudCheckBox @bind-Checked="@_advantage" Label="Advantage" Color="Color.Primary"></MudCheckBox>
+    <MudCheckBox @bind-Checked="@_disadvantage" Label="Disadvantage" Color="Color.Primary"></MudCheckBox>
+    <MudCheckBox @bind-Checked="@_autoCrit" Label="Auto-Crit" Color="Color.Primary"></MudCheckBox>
+</MudPaper>
 
 @code {
-
-    [Parameter]
-    public int Size { get; set; }
 
     private bool _hideMisses = false;
     private bool _advantage = false;
     private bool _disadvantage = false;
     private bool _autoCrit = false;
-    
+
     private MudTextField<int> _attackNum;
     private MudTextField<int> _toHitMod;
     private MudTextField<int> _ac;
@@ -67,7 +62,7 @@
     {
         await AttacksChanged.InvokeAsync(Attacks);
     }
-    
+
     private async Task ClearAttacks()
     {
         Attacks = Enumerable.Empty<AttackResult>().ToList();
@@ -102,4 +97,3 @@
     }
 
 }
-

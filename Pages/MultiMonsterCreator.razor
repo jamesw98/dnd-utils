@@ -18,7 +18,9 @@
 <br/>
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudGrid>
-        <MonsterInput Size="7" @bind-Monsters="_monsters"/>
+        <MudItem xs="12" sm="7">
+            <MonsterInput @bind-Monsters="_monsters"/>    
+        </MudItem>
         <MudItem xs="12" sm="5">
             <MudPaper Class="pa-4 mud-height-full">
                 <MudTable Items="@_monsters" Breakpoint="Breakpoint.Md">

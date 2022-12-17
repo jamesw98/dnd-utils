@@ -21,11 +21,11 @@
         </div>
         <br/>
         <div class="d-flex">
-            <MudTextField T="int" Label="HitDieNum" Required="true" RequiredError="Number of hit die is required!" @ref="_hitDieNum"/>
+            <MudTextField T="int" Label="Hit Die Num" Required="true" RequiredError="Number of hit die is required!" @ref="_hitDieNum" Disabled="_useFixedHp"/>
             <MudSpacer/>
-            <MudTextField T="int" Label="HitDieType" Required="true" RequiredError="Hit die type is required!" @ref="_hitDieType"/>
+            <MudTextField T="int" Label="Hit Die Type" Required="true" RequiredError="Hit die type is required!" @ref="_hitDieType" Disabled="_useFixedHp"/>
             <MudSpacer/>
-            <MudTextField T="int" Label="HitDieMod" Required="true" RequiredError="Hit die mod is required!" @ref="_hitDieMod"/>
+            <MudTextField T="int" Label="Hit Die Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_hitDieMod" Disabled="_useFixedHp"/>
         </div>
     </MudForm>
 </MudPaper>
@@ -36,11 +36,17 @@
     </MudTooltip>
     <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Error" OnClick="ClearMonsters">Clear</MudButton>
 </MudPaper>
+<br/>
+<MudText Typo="Typo.h4">Optional</MudText>
+<MudPaper Class="pa-4 mt-4">
+    <MudCheckBox @bind-Checked="@_useFixedHp" Label="Use Fixed Health" Color="Color.Primary"/>
+    @if (_useFixedHp)
+    {
+        <MudTextField T="int" Label="Fixed HP" @ref="_fixedHp"/>    
+    }
+</MudPaper>
 
 @code {
-
-    [Parameter]
-    public int Size { get; set; }
 
     [Parameter]
     public List<Monster> Monsters { get; set; }
@@ -56,6 +62,9 @@
     private MudTextField<int> _hitDieNum;
     private MudTextField<int> _hitDieType;
     private MudTextField<int> _hitDieMod;
+    private MudTextField<int> _fixedHp;
+
+    private bool _useFixedHp = false;
 
     private async Task Invoke()
     {
@@ -70,8 +79,18 @@
             return;
         }
 
-        Monsters = MonsterService.GenerateMonsters(_name.Value, _number.Value, _passive.Value, _initMod.Value,
-            _ac.Value, _hitDieType.Value, _hitDieNum.Value, _hitDieMod.Value);
+        if (_useFixedHp)
+        {
+            Monsters.AddRange(MonsterService.GenerateMonsters(_name.Value, _number.Value, _passive.Value, _initMod.Value,
+                _ac.Value, _hitDieType.Value, _hitDieNum.Value, _hitDieMod.Value, _fixedHp.Value));
+        }
+        else
+        {
+            Monsters.AddRange(MonsterService.GenerateMonsters(_name.Value, _number.Value, _passive.Value, _initMod.Value,
+                _ac.Value, _hitDieType.Value, _hitDieNum.Value, _hitDieMod.Value));
+        }
+
+        Monsters = Monsters.OrderByDescending(x => x.Initiative).ToList();
         await Invoke();
     }
 

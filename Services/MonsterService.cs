@@ -34,7 +34,7 @@ public class MonsterService
         
         var count = 1;
         foreach (var r in result)
-            r.Name = name + count++; 
+            r.Name = $"{name} {count++}";   
 
         return result;
     }

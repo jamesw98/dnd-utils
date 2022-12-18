@@ -1,10 +1,5 @@
 ﻿@page "/attack"
-@using dnd_utils.Services
 @using dnd_utils.Models
-@using dnd_utils.Exceptions
-
-@inject ISnackbar Snackbar
-@inject AttackService AttackService
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
@@ -25,37 +20,8 @@
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudGrid>
         <MudItem xs="12" sm="7">
-            <MudPaper Class="pa-8">
-                <MudForm>
-                    <div class="d-flex">
-                        <MudTextField T="int" Label="Number of Attacks" Required="true" RequiredError="Number of attacks is required!" @ref="_attackNum"/>
-                        <MudSpacer/>
-                        <MudTextField T="int" Label="To Hit Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_toHitMod"/>
-                        <MudSpacer/>
-                        <MudTextField T="int" Label="AC To Beat" Required="true" RequiredError="Hit die mod is required!" @ref="_ac"/>
-                    </div>
-                    <br/>
-                    <div class="d-flex">
-                        <MudTextField T="int" Label="Number of Damage Dice" Required="true" RequiredError="Number of attacks is required!" @ref="_damageNum"/>
-                        <MudSpacer/>
-                        <MudTextField T="int" Label="Damage Die" Required="true" RequiredError="Hit die mod is required!" @ref="_damageDie"/>
-                        <MudSpacer/>
-                        <MudTextField T="int" Label="Damage Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_damageMod"/>
-                    </div>
-                </MudForm>
-            </MudPaper>
-            <MudPaper Class="pa-4 mt-4">
-                <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Refresh" OnClick="CalcAttacks">Roll!</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="ClearAttacks">Clear</MudButton>
-            </MudPaper>
-            <br/>
-            <MudText Typo="Typo.h4">Optional</MudText>
-            <MudPaper Class="pa-4 mt-4">
-                <MudCheckBox @bind-Checked="@_hideMisses" Label="Hide Misses" Color="Color.Primary"></MudCheckBox>
-                <MudCheckBox @bind-Checked="@_advantage" Label="Advantage" Color="Color.Primary"></MudCheckBox>
-                <MudCheckBox @bind-Checked="@_disadvantage" Label="Disadvantage" Color="Color.Primary"></MudCheckBox>
-            </MudPaper>
-        </MudItem>
+            <AttackInputs @bind-Attacks="_attacks" Creatures="new List<Monster>()"/>    
+        </MudItem>        
         <MudItem xs="12" sm="5">
             <MudPaper Class="pa-4 mud-height-full">
                 <MudTable Items="_attacks" Breakpoint="Breakpoint.Md">
@@ -82,18 +48,6 @@
 </MudContainer>
 
 @code {
-    private MudTextField<int> _attackNum;
-    private MudTextField<int> _toHitMod;
-    private MudTextField<int> _ac;
-    private MudTextField<int> _damageNum;
-    private MudTextField<int> _damageDie;
-    private MudTextField<int> _damageMod;
-
-    private bool _hideMisses;
-    private bool _advantage;
-    private bool _disadvantage;
-    private bool _autoCrit;
-
     private List<AttackResult> _attacks = new();
 
     [Inject]
@@ -111,36 +65,4 @@
 
         StateHasChanged();
     }
-
-    private void CalcAttacks()
-    {
-        ClearAttacks();
-
-        try
-        {
-            var attacks = AttackService.CalculateAttackResults(
-                _attackNum.Value,
-                _toHitMod.Value,
-                _ac.Value,
-                _damageNum.Value,
-                _damageDie.Value,
-                _damageMod.Value,
-                _hideMisses,
-                _advantage,
-                _disadvantage,
-                _autoCrit);
-
-            _attacks.AddRange(attacks);
-        }
-        catch (IllegalStateException e)
-        {
-            Snackbar.Add(e.Message, Severity.Error);
-        }
-    }
-
-    private void ClearAttacks()
-    {
-        _attacks.Clear();
-    }
-
 }

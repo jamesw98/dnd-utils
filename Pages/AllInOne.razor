@@ -1,0 +1,106 @@
+﻿@page "/combat"
+@using dnd_utils.Models
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2">
+        D&D All In One
+    </MudText>
+    <MudDivider/>
+    <MudText Typo="Typo.body1">
+        Placeholder
+    </MudText>
+    <MudText Typo="Typo.body1">
+        Placeholder
+    </MudText>
+</MudContainer>
+<br/>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <MudExpansionPanels MultiExpansion="true">
+                <MudExpansionPanel Text="Creature Creator">
+                    <MonsterInput @bind-Monsters="_creatures"/>
+                </MudExpansionPanel>
+                <MudExpansionPanel Text="Attack Calculator">
+                    <AttackInputs @bind-Attacks="_attacks" CombatManagerLayout="true" Creatures="_creatures"/>
+                </MudExpansionPanel>
+                <MudExpansionPanel Text="HP Calculator">
+                    <HpInput @bind-Creatures="_creatures" @bind-SavingThrow="@_savingThrow" IncludeCreatureAdder="false" IncludeDamageModifiers="false"/>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+        </MudItem>
+        <MudItem xs="12" sm="5">
+            <MudPaper Class="pa-4">
+                <MudTable Items="_creatures" Breakpoint="Breakpoint.Md">
+                    <HeaderContent>
+                        @if (_savingThrow)
+                        {
+                            <MudTh>Passed?</MudTh>
+                        }
+                        <MudTh>Initiative</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>AC</MudTh>
+                        <MudTh>Passive</MudTh>
+                        <MudTh>HP</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        @if (_savingThrow)
+                        {
+                            <MudTd>
+                                <MudCheckBox @oninput="() => { context.PassedSavingThrow = !context.PassedSavingThrow; }" @bind-Checked="@context.PassedSavingThrow"/>
+                            </MudTd>
+                        }
+                        <MudTd>@context.Initiative</MudTd>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>@context.ArmorClass</MudTd>
+                        <MudTd>@context.PassivePerception</MudTd>
+                        <MudTd>@context.HitPoints</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+            <MudPaper Class="pa-4">
+                <MudTable Items="_attacks" Breakpoint="Breakpoint.Md">
+                    <HeaderContent>
+                        <MudTh>Attack Roll</MudTh>
+                        <MudTh>Hit?</MudTh>
+                        <MudTh>Damage Roll</MudTh>
+                        <MudTh>Crit?</MudTh>
+                        <MudTh>Info</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.AttackDetail.Total</MudTd>
+                        <MudTd>@(context.Hit ? "Hit" : "Miss")</MudTd>
+                        <MudTd>@context.Damange</MudTd>
+                        <MudTd>@(context.Crit ? "Yes" : "No")</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Info" aria-label="info" OnClick="async () => { await OnButtonClicked(context); }"></MudIconButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<Monster> _creatures = new();
+    private List<AttackResult> _attacks = new();
+    private bool _savingThrow = false;
+    
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    private async Task OnButtonClicked(AttackResult ar)
+    {
+        var message = "";
+        if (ar.UnusedAttackDetail != null)
+            message = $"<b>To hit:</b> <br /> <u>{ar.AttackDetail}</u> <br />{ar.UnusedAttackDetail}<br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}";
+        else
+            message = $"<b>To hit:</b> <br /> {ar.AttackDetail} <br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}";
+
+        await DialogService.ShowMessageBox("Attack Result Info", (MarkupString)message);
+
+        StateHasChanged();
+    }
+}

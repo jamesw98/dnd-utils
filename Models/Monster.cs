@@ -13,4 +13,9 @@ public class Monster
     public List<DamageType> Resistances { get; set; } = new();
     public List<DamageType> Vulnerabilities { get; set; } = new();
     public List<DamageType> Immunities { get; set; } = new();
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }

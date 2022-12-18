@@ -12,6 +12,28 @@ public class AttackService
     {
         _dice = dice;
     }
+
+    public List<Monster> DealDamage(List<Monster> creatures, List<AttackResult> attacks)
+    {
+        foreach (var a in attacks)
+        {
+            foreach (var c in creatures.Where(x => x.ArmorClass <= a.AttackDetail.Total))
+            {
+                var damage = a.DamageDetail.Total;
+                
+                if (c.Immunities.Contains(a.Type))
+                    damage = 0;
+                else if (c.Vulnerabilities.Contains(a.Type))
+                    damage *= 2;
+                else if (c.Resistances.Contains(a.Type))
+                    damage /= 2;
+
+                c.HitPoints -= damage;
+            }
+        }
+
+        return creatures;
+    }
     
     /// <summary>
     /// gets attack results for the given inputs

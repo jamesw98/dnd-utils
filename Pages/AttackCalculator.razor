@@ -20,7 +20,7 @@
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudGrid>
         <MudItem xs="12" sm="7">
-            <AttackInputs @bind-Attacks="_attacks"/>    
+            <AttackInputs @bind-Attacks="_attacks" Creatures="new List<Monster>()"/>    
         </MudItem>        
         <MudItem xs="12" sm="5">
             <MudPaper Class="pa-4 mud-height-full">

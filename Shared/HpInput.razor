@@ -41,61 +41,67 @@
 }
 <MudText Typo="Typo.h4">Optional</MudText>
 <MudPaper Class="pa-4">
-    <MudCheckBox @bind-Checked="@_addResistances" Label="Use Resistances" Color="Color.Primary"/>
-    <MudSpacer/>
-    @if (_addResistances)
+    @if (IncludeDamageModifiers)
     {
-        <MudSelect @bind-SelectedValues="_creatureResistances" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
-            @foreach (var dt in _damageTypes)
-            {
-                <MudSelectItem T="DamageType" Value="@dt"/>
-            }
-        </MudSelect>
+        <MudCheckBox @bind-Checked="@_addResistances" Label="Use Resistances" Color="Color.Primary"/>
+        <MudSpacer/>
+        @if (_addResistances)
+        {
+            <MudSelect @bind-SelectedValues="_creatureResistances" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+                @foreach (var dt in _damageTypes)
+                {
+                    <MudSelectItem T="DamageType" Value="@dt"/>
+                }
+            </MudSelect>
+            <MudSpacer/>
+        }
+        <MudCheckBox @bind-Checked="@_addVulnerabilities" Label="Use Vulnerabilities" Color="Color.Primary"/>
+        <MudSpacer/>
+        @if (_addVulnerabilities)
+        {
+            <MudSelect @bind-SelectedValues="_creatureVulnerabilities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+                @foreach (var dt in _damageTypes)
+                {
+                    <MudSelectItem T="DamageType" Value="@dt"/>
+                }
+            </MudSelect>
+            <MudSpacer/>
+        }
+        <MudCheckBox @bind-Checked="@_addImmunities" Label="Use Immunities" Color="Color.Primary"/>
+        <MudSpacer/>
+        @if (_addImmunities)
+        {
+            <MudSelect @bind-SelectedValues="_creatureImmunities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
+                @foreach (var dt in _damageTypes)
+                {
+                    <MudSelectItem T="DamageType" Value="@dt"/>
+                }
+            </MudSelect>
+            <MudSpacer/>
+        }
+    }
+    @if (IncludeCreatureAdder)
+    {
+        <MudCheckBox @bind-Checked="@_randomHealth" Label="Use Random Health" Color="Color.Primary"/>
+        <MudSpacer/>
+        @if (_randomHealth)
+        {
+            <MudTextField T="int" Label="Hit Die Num" Required="true" RequiredError="Number of hit die is required!" @ref="_hitDieNum"/>
+            <MudSpacer/>
+            <MudTextField T="int" Label="Hit Die Type" Required="true" RequiredError="Hit die type is required!" @ref="_hitDieType"/>
+            <MudSpacer/>
+            <MudTextField T="int" Label="Hit Die Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_hitDieMod"/>
+            <MudSpacer/>
+        }
+        <MudCheckBox @bind-Checked="@_createMultiple" Label="Create multiple" Color="Color.Primary"/>
+        <MudSpacer/>
+        @if (_createMultiple)
+        {
+            <MudTextField T="int" Label="Number of Creatures" Required="true" RequiredError="Number of creatures is required!" @ref="_numberOfCreatures"/>
+            <MudSpacer/>
+        }
         <MudSpacer/>
     }
-    <MudCheckBox @bind-Checked="@_addVulnerabilities" Label="Use Vulnerabilities" Color="Color.Primary"/>
-    <MudSpacer/>
-    @if (_addVulnerabilities)
-    {
-        <MudSelect @bind-SelectedValues="_creatureVulnerabilities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
-            @foreach (var dt in _damageTypes)
-            {
-                <MudSelectItem T="DamageType" Value="@dt"/>
-            }
-        </MudSelect>
-        <MudSpacer/>
-    }
-    <MudCheckBox @bind-Checked="@_addImmunities" Label="Use Immunities" Color="Color.Primary"/>
-    <MudSpacer/>
-    @if (_addImmunities)
-    {
-        <MudSelect @bind-SelectedValues="_creatureImmunities" MultiSelection="true" T="DamageType" Label="Damage Type" AnchorOrigin="Origin.BottomCenter" Placeholder="@DamageType.Acid.ToString()">
-            @foreach (var dt in _damageTypes)
-            {
-                <MudSelectItem T="DamageType" Value="@dt"/>
-            }
-        </MudSelect>
-        <MudSpacer/>
-    }
-    <MudCheckBox @bind-Checked="@_randomHealth" Label="Use Random Health" Color="Color.Primary"/>
-    <MudSpacer/>
-    @if (_randomHealth)
-    {
-        <MudTextField T="int" Label="Hit Die Num" Required="true" RequiredError="Number of hit die is required!" @ref="_hitDieNum"/>
-        <MudSpacer/>
-        <MudTextField T="int" Label="Hit Die Type" Required="true" RequiredError="Hit die type is required!" @ref="_hitDieType"/>
-        <MudSpacer/>
-        <MudTextField T="int" Label="Hit Die Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_hitDieMod"/>
-        <MudSpacer/>
-    }
-    <MudCheckBox @bind-Checked="@_createMultiple" Label="Create multiple" Color="Color.Primary"/>
-    <MudSpacer/>
-    @if (_createMultiple)
-    {
-        <MudTextField T="int" Label="Number of Creatures" Required="true" RequiredError="Number of creatures is required!" @ref="_numberOfCreatures"/>
-        <MudSpacer/>
-    }
-    <MudSpacer/>
     <MudCheckBox T="bool" @oninput="InvokeSavingThrow" label="Use Saving Throws" Color="Color.Primary"/>
 </MudPaper>
 
@@ -112,9 +118,12 @@
 
     [Parameter]
     public EventCallback<bool> SavingThrowChanged { get; set; }
-    
+
     [Parameter]
     public bool IncludeCreatureAdder { get; set; }
+    
+    [Parameter]
+    public bool IncludeDamageModifiers { get; set; }
 
     private List<DamageType> _damageTypes = Enum.GetValues<DamageType>().ToList();
     private bool _addResistances = false;
@@ -122,7 +131,7 @@
     private bool _addImmunities = false;
     private bool _randomHealth = false;
     private bool _createMultiple = false;
-    
+
     private IEnumerable<DamageType> _creatureResistances = new HashSet<DamageType>();
     private IEnumerable<DamageType> _creatureVulnerabilities = new HashSet<DamageType>();
     private IEnumerable<DamageType> _creatureImmunities = new HashSet<DamageType>();

@@ -1,16 +1,16 @@
-﻿@page "/hp"
+﻿@page "/combat"
 @using dnd_utils.Models
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
-        D&D HP Tracker
+        D&D All In One
     </MudText>
     <MudDivider/>
     <MudText Typo="Typo.body1">
-        Have a bunch of players that just got hit by a Blue Dragon's lightning breath? Or maybe you just want to keep track of a bunch of monsters' hp.
+        Placeholder
     </MudText>
     <MudText Typo="Typo.body1">
-        This tool aims to help with that. You can add any number of creatures and modify their HP indivudually or in bulk.
+        Placeholder
     </MudText>
 </MudContainer>
 <br/>
@@ -18,17 +18,30 @@
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudGrid>
         <MudItem xs="12" sm="7">
-            <HpInput @bind-Creatures="_creatures" @bind-SavingThrow="@_savingThrow" IncludeCreatureAdder="true" IncludeDamageModifiers="true"/>
+            <MudExpansionPanels MultiExpansion="true">
+                <MudExpansionPanel Text="Creature Creator">
+                    <MonsterInput @bind-Monsters="_creatures"/>
+                </MudExpansionPanel>
+                <MudExpansionPanel Text="Attack Calculator">
+                    <AttackInputs @bind-Attacks="_attacks" CombatManagerLayout="true" Creatures="_creatures"/>
+                </MudExpansionPanel>
+                <MudExpansionPanel Text="HP Calculator">
+                    <HpInput @bind-Creatures="_creatures" @bind-SavingThrow="@_savingThrow" IncludeCreatureAdder="false" IncludeDamageModifiers="false"/>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
         </MudItem>
         <MudItem xs="12" sm="5">
-            <MudPaper Class="pa-4 mud-height-full">
+            <MudPaper Class="pa-4">
                 <MudTable Items="_creatures" Breakpoint="Breakpoint.Md">
                     <HeaderContent>
                         @if (_savingThrow)
                         {
                             <MudTh>Passed?</MudTh>
                         }
+                        <MudTh>Initiative</MudTh>
                         <MudTh>Name</MudTh>
+                        <MudTh>AC</MudTh>
+                        <MudTh>Passive</MudTh>
                         <MudTh>HP</MudTh>
                     </HeaderContent>
                     <RowTemplate>
@@ -38,7 +51,10 @@
                                 <MudCheckBox @oninput="() => { context.PassedSavingThrow = !context.PassedSavingThrow; }" @bind-Checked="@context.PassedSavingThrow"/>
                             </MudTd>
                         }
+                        <MudTd>@context.Initiative</MudTd>
                         <MudTd>@context.Name</MudTd>
+                        <MudTd>@context.ArmorClass</MudTd>
+                        <MudTd>@context.PassivePerception</MudTd>
                         <MudTd>@context.HitPoints</MudTd>
                     </RowTemplate>
                 </MudTable>
@@ -48,8 +64,12 @@
 </MudContainer>
 
 @code {
-
     private List<Monster> _creatures = new();
-    private bool _savingThrow;
+    private List<AttackResult> _attacks = new();
+    private bool _savingThrow = false;
 
+    // private async Task DealDamage()
+    // {
+    //     
+    // } 
 }

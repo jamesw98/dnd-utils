@@ -75,6 +75,9 @@
     public List<Monster> Creatures { get; set; }
     
     [Parameter]
+    public EventCallback<List<Monster>> CreaturesChanged { get; set; }
+    
+    [Parameter]
     public bool CombatManagerLayout { get; set; }
 
     private List<Monster> _creaturesToHit = new();
@@ -95,7 +98,12 @@
     private MudTextField<int> _damageDie;
     private MudTextField<int> _damageMod;
 
-    private async Task Invoke()
+    private async Task InvokeAttacks()
+    {
+        await AttacksChanged.InvokeAsync(Attacks);
+    }
+    
+    private async Task InvokeCreatures()
     {
         await AttacksChanged.InvokeAsync(Attacks);
     }
@@ -103,7 +111,7 @@
     private async Task ClearAttacks()
     {
         Attacks = Enumerable.Empty<AttackResult>().ToList();
-        await Invoke();
+        await InvokeAttacks();
     }
 
     private async Task CalcAttacks()
@@ -125,7 +133,13 @@
                 _autoCrit);
 
             Attacks.AddRange(attacks);
-            await Invoke();
+            await InvokeAttacks();
+
+            if (CombatManagerLayout)
+            {
+                Creatures = AttackService.DealDamage(Creatures, Attacks);
+                await InvokeCreatures();
+            }
         }
         catch (IllegalStateException e)
         {

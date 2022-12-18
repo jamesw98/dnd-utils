@@ -59,6 +59,26 @@
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
+            <MudPaper Class="pa-4">
+                <MudTable Items="_attacks" Breakpoint="Breakpoint.Md">
+                    <HeaderContent>
+                        <MudTh>Attack Roll</MudTh>
+                        <MudTh>Hit?</MudTh>
+                        <MudTh>Damage Roll</MudTh>
+                        <MudTh>Crit?</MudTh>
+                        <MudTh>Info</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.AttackDetail.Total</MudTd>
+                        <MudTd>@(context.Hit ? "Hit" : "Miss")</MudTd>
+                        <MudTd>@context.Damange</MudTd>
+                        <MudTd>@(context.Crit ? "Yes" : "No")</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Info" aria-label="info" OnClick="async () => { await OnButtonClicked(context); }"></MudIconButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
         </MudItem>
     </MudGrid>
 </MudContainer>
@@ -67,9 +87,20 @@
     private List<Monster> _creatures = new();
     private List<AttackResult> _attacks = new();
     private bool _savingThrow = false;
+    
+    [Inject]
+    private IDialogService DialogService { get; set; }
 
-    // private async Task DealDamage()
-    // {
-    //     
-    // } 
+    private async Task OnButtonClicked(AttackResult ar)
+    {
+        var message = "";
+        if (ar.UnusedAttackDetail != null)
+            message = $"<b>To hit:</b> <br /> <u>{ar.AttackDetail}</u> <br />{ar.UnusedAttackDetail}<br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}";
+        else
+            message = $"<b>To hit:</b> <br /> {ar.AttackDetail} <br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}";
+
+        await DialogService.ShowMessageBox("Attack Result Info", (MarkupString)message);
+
+        StateHasChanged();
+    }
 }

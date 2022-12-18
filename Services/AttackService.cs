@@ -29,6 +29,9 @@ public class AttackService
                     damage /= 2;
 
                 c.HitPoints -= damage;
+                
+                if (c.HitPoints < 0)
+                    c.HitPoints = 0;
             }
         }
 

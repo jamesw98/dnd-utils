@@ -12,4 +12,6 @@ public class AttackResult
     public int AcToBeat { get; set; }
     public int Damange { get; set; }
     public bool Hit { get; set; }
+    public List<Monster> CreaturesTargeted { get; set; } = new();
+    public List<Monster> CreaturesHit { get; set; } = new();
 }

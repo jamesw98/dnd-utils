@@ -9,6 +9,17 @@
 <MudPaper Class="pa-8">
     <MudForm>
         <div class="d-flex">
+            @if (CombatManagerLayout)
+            {
+            <MudSelect @bind-SelectedValues="_creaturesToHit" MultiSelection="true" T="Monster" Label="Targeted Creatures" AnchorOrigin="Origin.BottomCenter">
+                @foreach (var c in Creatures)
+                {
+                    <MudSelectItem T="Monster" Value="@c"/>
+                }
+            </MudSelect>
+            }
+        </div>
+        <div class="d-flex">
             <MudTextField T="int" Label="Number of Attacks" Required="true" RequiredError="Number of attacks is required!" @ref="_attackNum"/>
             <MudSpacer/>
             <MudTextField T="int" Label="To Hit Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_toHitMod"/>
@@ -16,15 +27,6 @@
             @if (!CombatManagerLayout)
             {
                 <MudTextField T="int" Label="AC To Beat" Required="true" RequiredError="Hit die mod is required!" @ref="_ac"/>
-            }
-            else
-            {
-                <MudSelect @bind-Values="_creaturesToHit" MultiSelection="true" T="Monster" Label="Targeted Creatures" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var c in Creatures)
-                    {
-                        <MudSelectItem T="Monster" Value="@c"/>
-                    }
-                </MudSelect>
             }
         </div>
         <br/>
@@ -67,20 +69,20 @@
 
     [Parameter]
     public List<AttackResult> Attacks { get; set; }
-    
+
     [Parameter]
     public EventCallback<List<AttackResult>> AttacksChanged { get; set; }
-    
+
     [Parameter]
     public List<Monster> Creatures { get; set; }
-    
+
     [Parameter]
     public EventCallback<List<Monster>> CreaturesChanged { get; set; }
-    
+
     [Parameter]
     public bool CombatManagerLayout { get; set; }
 
-    private List<Monster> _creaturesToHit = new();
+    private IEnumerable<Monster> _creaturesToHit = new HashSet<Monster>();
 
     private List<DamageType> _damageTypes = Enum.GetValues<DamageType>().ToList();
     private DamageType _damageType = DamageType.Acid;
@@ -102,7 +104,7 @@
     {
         await AttacksChanged.InvokeAsync(Attacks);
     }
-    
+
     private async Task InvokeCreatures()
     {
         await AttacksChanged.InvokeAsync(Attacks);
@@ -137,7 +139,7 @@
 
             if (CombatManagerLayout)
             {
-                Creatures = AttackService.DealDamage(Creatures, Attacks);
+                Creatures = AttackService.DealDamage(Creatures, _creaturesToHit, Attacks);
                 await InvokeCreatures();
             }
         }

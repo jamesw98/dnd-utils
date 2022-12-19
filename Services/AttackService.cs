@@ -13,12 +13,20 @@ public class AttackService
         _dice = dice;
     }
 
-    public List<Monster> DealDamage(List<Monster> creatures, List<AttackResult> attacks)
+    public List<Monster> DealDamage(List<Monster> creatures, IEnumerable<Monster> creaturesToHit, List<AttackResult> attacks)
     {
         foreach (var a in attacks)
         {
-            foreach (var c in creatures.Where(x => x.ArmorClass <= a.AttackDetail.Total))
+            var creaturesHit = creatures.Where(x => x.ArmorClass <= a.AttackDetail.Total).ToList();
+            a.CreaturesTargeted = creaturesToHit.ToList();
+                
+            foreach (var c in creaturesHit)
             {
+                if (!creaturesToHit.Select(x => x.Name).Contains(c.Name))
+                    continue;
+                
+                a.CreaturesHit.Add(c);
+                
                 var damage = a.DamageDetail.Total;
                 
                 if (c.Immunities.Contains(a.Type))

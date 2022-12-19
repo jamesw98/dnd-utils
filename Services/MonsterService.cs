@@ -12,13 +12,13 @@ public class MonsterService
     }
     
     public List<Monster> GenerateMonsters(string name, int number, int passive, int initMod, int ac, int hitDieType, 
-        int hitDieNum, int hitDieMod, int fixedHp=-1)
+        int hitDieNum, int hitDieMod, int fixedHp=-1, int fixedInit=-1)
     {
         List<Monster> result = new();
 
         for (int i = 0; i < number; i++)
         {
-            var init = _dice.Roll(1, 20, initMod);
+            var init = fixedInit == -1 ? _dice.Roll(1, 20, initMod) : fixedInit;
             var hp = fixedHp == -1 ? _dice.Roll(hitDieNum, hitDieType, hitDieMod) : fixedHp;
             
             result.Add(new Monster

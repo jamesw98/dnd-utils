@@ -15,7 +15,7 @@
         </div>
         <br/>
         <div class="d-flex">
-            <MudTextField T="int" Label="Init Mod" Required="true" RequiredError="Initiative mod is required!" @ref="_initMod"/>
+            <MudTextField T="int" Label="Init Mod" Required="true" RequiredError="Initiative mod is required!" @ref="_initMod" Disabled="_useFixedInit"/>
             <MudSpacer/>
             <MudTextField T="int" Label="AC" Required="true" RequiredError="Armor class is required!" @ref="_ac"/>
             <MudSpacer/>
@@ -45,6 +45,12 @@
     @if (_useFixedHp)
     {
         <MudTextField T="int" Label="Fixed HP" @ref="_fixedHp"/>
+    }
+    <MudSpacer/>
+    <MudCheckBox @bind-Checked="@_useFixedInit" Label="Use Fixed Initiative" Color="Color.Primary"/>
+    @if (_useFixedInit)
+    {
+        <MudTextField T="int" Label="Fixed Initiative" @ref="_fixedInit"/>
     }
     <MudSpacer/>
     <MudCheckBox @bind-Checked="@_addResistances" Label="Use Resistances" Color="Color.Primary"/>
@@ -102,13 +108,15 @@
     private MudTextField<int> _hitDieType;
     private MudTextField<int> _hitDieMod;
     private MudTextField<int> _fixedHp;
-    
+    private MudTextField<int> _fixedInit;   
+
     private List<DamageType> _damageTypes = Enum.GetValues<DamageType>().ToList();
     private IEnumerable<DamageType> _creatureResistances = new HashSet<DamageType>();
     private IEnumerable<DamageType> _creatureVulnerabilities = new HashSet<DamageType>();
     private IEnumerable<DamageType> _creatureImmunities = new HashSet<DamageType>();
 
     private bool _useFixedHp = false;
+    private bool _useFixedInit = false;
     private bool _addResistances = false;
     private bool _addVulnerabilities = false;
     private bool _addImmunities = false;
@@ -126,17 +134,11 @@
             return;
         }
 
-        List<Monster> newMonsters = new();
-        if (_useFixedHp)
-        {
-            newMonsters.AddRange(MonsterService.GenerateMonsters(_name.Value, _number.Value, _passive.Value, _initMod.Value,
-                _ac.Value, _hitDieType.Value, _hitDieNum.Value, _hitDieMod.Value, _fixedHp.Value));
-        }
-        else
-        {
-            newMonsters.AddRange(MonsterService.GenerateMonsters(_name.Value, _number.Value, _passive.Value, _initMod.Value,
-                _ac.Value, _hitDieType.Value, _hitDieNum.Value, _hitDieMod.Value));
-        }
+        var init = _useFixedInit ? _fixedInit.Value : -1;
+        var hp = _useFixedHp ? _fixedHp.Value : -1;
+        
+        var newMonsters = MonsterService.GenerateMonsters(_name.Value, _number.Value, _passive.Value, 
+            _initMod.Value, _ac.Value, _hitDieType.Value, _hitDieNum.Value, _hitDieMod.Value, hp, init);
 
         foreach (var m in newMonsters)
         {
@@ -144,14 +146,14 @@
             m.Vulnerabilities = _creatureVulnerabilities.ToList();
             m.Resistances = _creatureResistances.ToList();
         }
-        
+
         Monsters.AddRange(newMonsters);
         Monsters = Monsters.OrderByDescending(x => x.Initiative).ToList();
-        
+
         _creatureResistances = Enumerable.Empty<DamageType>();
         _creatureVulnerabilities = Enumerable.Empty<DamageType>();
         _creatureImmunities = Enumerable.Empty<DamageType>();
-        
+
         await Invoke();
     }
 

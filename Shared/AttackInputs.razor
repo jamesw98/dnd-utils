@@ -163,7 +163,13 @@
 
             if (CombatManagerLayout)
             {
-                Creatures = AttackService.DealDamage(Creatures, _creaturesToHit, Attacks, SavingThrow);
+                var tempCreatures = AttackService.DealDamage(Creatures, _creaturesToHit, Attacks, SavingThrow);
+                var deadCreatures = tempCreatures.Where(x => x.HitPoints == 0).ToList();
+                
+                tempCreatures.RemoveAll(x => x.HitPoints == 0);
+                tempCreatures.AddRange(deadCreatures);
+                
+                Creatures = tempCreatures; 
                 await InvokeCreatures();
             }
         }

@@ -41,7 +41,8 @@ public class DiceService
             Num = num,
             Die = type,
             Mod = mod,
-            Total = total
+            Total = total,
+            Fixed = false
         };
     }
     

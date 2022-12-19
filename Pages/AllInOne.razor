@@ -23,10 +23,7 @@
                     <MonsterInput @bind-Monsters="_creatures"/>
                 </MudExpansionPanel>
                 <MudExpansionPanel Text="Attack Calculator">
-                    <AttackInputs @bind-Attacks="_attacks" CombatManagerLayout="true" Creatures="_creatures"/>
-                </MudExpansionPanel>
-                <MudExpansionPanel Text="HP Calculator">
-                    <HpInput @bind-Creatures="_creatures" @bind-SavingThrow="@_savingThrow" IncludeCreatureAdder="false" IncludeDamageModifiers="false"/>
+                    <AttackInputs @bind-Attacks="_attacks" CombatManagerLayout="true" @bind-SavingThrow="@_savingThrow" Creatures="_creatures"/>
                 </MudExpansionPanel>
             </MudExpansionPanels>
         </MudItem>
@@ -63,14 +60,12 @@
                 <MudTable Items="_attacks" Breakpoint="Breakpoint.Md">
                     <HeaderContent>
                         <MudTh>Attack Roll</MudTh>
-                        <MudTh>Hit?</MudTh>
                         <MudTh>Damage Roll</MudTh>
                         <MudTh>Crit?</MudTh>
                         <MudTh>Info</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@context.AttackDetail.Total</MudTd>
-                        <MudTd>@(context.Hit ? "Hit" : "Miss")</MudTd>
                         <MudTd>@context.Damange</MudTd>
                         <MudTd>@(context.Crit ? "Yes" : "No")</MudTd>
                         <MudTd>

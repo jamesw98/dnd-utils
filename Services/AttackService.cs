@@ -14,11 +14,12 @@ public class AttackService
     }
 
     public List<Monster> DealDamage(List<Monster> creatures, IEnumerable<Monster> creaturesToHit,
-        List<AttackResult> attacks)
+        List<AttackResult> attacks, bool savingThrow)
     {
         foreach (var a in attacks)
         {
-            var creaturesHit = creatures.Where(x => x.ArmorClass <= a.AttackDetail.Total).ToList();
+            var creaturesHit =
+                savingThrow ? creatures : creatures.Where(x => x.ArmorClass <= a.AttackDetail.Total).ToList();
             a.CreaturesTargeted = creaturesToHit.ToList();
 
             foreach (var c in creaturesHit)
@@ -35,6 +36,9 @@ public class AttackService
                 else if (c.Vulnerabilities.Contains(a.Type))
                     damage *= 2;
                 else if (c.Resistances.Contains(a.Type))
+                    damage /= 2;
+
+                if (savingThrow && c.PassedSavingThrow)
                     damage /= 2;
 
                 c.HitPoints -= damage;

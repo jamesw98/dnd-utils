@@ -22,8 +22,8 @@
         <div class="d-flex">
             <MudTextField T="int" Label="Number of Attacks" Required="true" RequiredError="Number of attacks is required!" @ref="_attackNum"/>
             <MudSpacer/>
-            <MudTextField T="int" Label="To Hit Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_toHitMod"/>
-            <MudSpacer/>
+            <MudTextField T="int" Label="To Hit Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_toHitMod" Disabled="SavingThrow"/>
+            <MudSpacer/>    
             @if (!CombatManagerLayout)
             {
                 <MudTextField T="int" Label="AC To Beat" Required="true" RequiredError="AC to beat is required!" @ref="_ac"/>
@@ -59,6 +59,10 @@
     {
         <MudCheckBox @bind-Checked="@_hideMisses" Label="Hide Misses" Color="Color.Primary"></MudCheckBox>
     }
+    else
+    {
+        <MudCheckBox T="bool" @oninput="InvokeSavingThrow" Label="Saving Throw" Color="Color.Primary"></MudCheckBox>    
+    }
     <MudCheckBox @bind-Checked="@_useFixedDamage" Label="Fixed Damage" Color="Color.Primary"></MudCheckBox>
     @if (_useFixedDamage)
     {
@@ -83,7 +87,13 @@
 
     [Parameter]
     public EventCallback<List<Monster>> CreaturesChanged { get; set; }
+    
+    [Parameter]
+    public bool SavingThrow { get; set; } = false;
 
+    [Parameter]
+    public EventCallback<bool> SavingThrowChanged { get; set; }
+    
     [Parameter]
     public bool CombatManagerLayout { get; set; }
 
@@ -124,6 +134,11 @@
         await InvokeAttacks();
     }
 
+    private async Task InvokeSavingThrow()
+    {
+        await SavingThrowChanged.InvokeAsync(!SavingThrow);
+    }
+
     private async Task CalcAttacks()
     {
         await ClearAttacks();
@@ -148,7 +163,7 @@
 
             if (CombatManagerLayout)
             {
-                Creatures = AttackService.DealDamage(Creatures, _creaturesToHit, Attacks);
+                Creatures = AttackService.DealDamage(Creatures, _creaturesToHit, Attacks, SavingThrow);
                 await InvokeCreatures();
             }
         }

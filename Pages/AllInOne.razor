@@ -23,10 +23,7 @@
                     <MonsterInput @bind-Monsters="_creatures"/>
                 </MudExpansionPanel>
                 <MudExpansionPanel Text="Attack Calculator">
-                    <AttackInputs @bind-Attacks="_attacks" CombatManagerLayout="true" Creatures="_creatures"/>
-                </MudExpansionPanel>
-                <MudExpansionPanel Text="HP Calculator">
-                    <HpInput @bind-Creatures="_creatures" @bind-SavingThrow="@_savingThrow" IncludeCreatureAdder="false" IncludeDamageModifiers="false"/>
+                    <AttackInputs @bind-Attacks="_attacks" CombatManagerLayout="true" @bind-SavingThrow="@_savingThrow" Creatures="_creatures"/>
                 </MudExpansionPanel>
             </MudExpansionPanels>
         </MudItem>

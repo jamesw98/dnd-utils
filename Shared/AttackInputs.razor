@@ -11,12 +11,12 @@
         <div class="d-flex">
             @if (CombatManagerLayout)
             {
-            <MudSelect @bind-SelectedValues="_creaturesToHit" MultiSelection="true" T="Monster" Label="Targeted Creatures" AnchorOrigin="Origin.BottomCenter">
-                @foreach (var c in Creatures)
-                {
-                    <MudSelectItem T="Monster" Value="@c"/>
-                }
-            </MudSelect>
+                <MudSelect @bind-SelectedValues="_creaturesToHit" MultiSelection="true" T="Monster" Label="Targeted Creatures" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var c in Creatures)
+                    {
+                        <MudSelectItem T="Monster" Value="@c"/>
+                    }
+                </MudSelect>
             }
         </div>
         <div class="d-flex">
@@ -26,7 +26,7 @@
             <MudSpacer/>
             @if (!CombatManagerLayout)
             {
-                <MudTextField T="int" Label="AC To Beat" Required="true" RequiredError="Hit die mod is required!" @ref="_ac"/>
+                <MudTextField T="int" Label="AC To Beat" Required="true" RequiredError="AC to beat is required!" @ref="_ac"/>
             }
         </div>
         <br/>

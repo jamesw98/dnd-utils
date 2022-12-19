@@ -60,14 +60,12 @@
                 <MudTable Items="_attacks" Breakpoint="Breakpoint.Md">
                     <HeaderContent>
                         <MudTh>Attack Roll</MudTh>
-                        <MudTh>Hit?</MudTh>
                         <MudTh>Damage Roll</MudTh>
                         <MudTh>Crit?</MudTh>
                         <MudTh>Info</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@context.AttackDetail.Total</MudTd>
-                        <MudTd>@(context.Hit ? "Hit" : "Miss")</MudTd>
                         <MudTd>@context.Damange</MudTd>
                         <MudTd>@(context.Crit ? "Yes" : "No")</MudTd>
                         <MudTd>

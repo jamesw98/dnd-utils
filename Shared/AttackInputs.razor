@@ -31,11 +31,11 @@
         </div>
         <br/>
         <div class="d-flex">
-            <MudTextField T="int" Label="Number of Damage Dice" Required="true" RequiredError="Number of attacks is required!" @ref="_damageNum"/>
+            <MudTextField T="int" Label="Number of Damage Dice" Required="true" RequiredError="Number of attacks is required!" @ref="_damageNum" Disabled="_useFixedDamage"/>
             <MudSpacer/>
-            <MudTextField T="int" Label="Damage Die" Required="true" RequiredError="Hit die mod is required!" @ref="_damageDie"/>
+            <MudTextField T="int" Label="Damage Die" Required="true" RequiredError="Hit die mod is required!" @ref="_damageDie" Disabled="_useFixedDamage"/>
             <MudSpacer/>
-            <MudTextField T="int" Label="Damage Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_damageMod"/>
+            <MudTextField T="int" Label="Damage Mod" Required="true" RequiredError="Hit die mod is required!" @ref="_damageMod" Disabled="_useFixedDamage"/>
         </div>
         <br/>
         <div class="d-flex">
@@ -58,6 +58,11 @@
     @if (!CombatManagerLayout)
     {
         <MudCheckBox @bind-Checked="@_hideMisses" Label="Hide Misses" Color="Color.Primary"></MudCheckBox>
+    }
+    <MudCheckBox @bind-Checked="@_useFixedDamage" Label="Fixed Damage" Color="Color.Primary"></MudCheckBox>
+    @if (_useFixedDamage)
+    {
+        <MudTextField T="int" Label="Fixed Damage" @ref="_fixedDamage"/>
     }
     <MudCheckBox @bind-Checked="@_autoCrit" Label="Auto-Crit" Color="Color.Primary"></MudCheckBox>
     <MudCheckBox @bind-Checked="@_advantage" Label="Advantage" Color="Color.Primary"></MudCheckBox>
@@ -91,6 +96,7 @@
     private bool _advantage = false;
     private bool _disadvantage = false;
     private bool _autoCrit = false;
+    private bool _useFixedDamage = false;
 
     private MudTextField<int> _attackNum;
     private MudTextField<int> _toHitMod;
@@ -99,6 +105,8 @@
     private MudTextField<int> _damageNum;
     private MudTextField<int> _damageDie;
     private MudTextField<int> _damageMod;
+    
+    private MudTextField<int> _fixedDamage;
 
     private async Task InvokeAttacks()
     {
@@ -132,7 +140,8 @@
                 _hideMisses,
                 _advantage,
                 _disadvantage,
-                _autoCrit);
+                _autoCrit,
+                _useFixedDamage ? _fixedDamage.Value : -1);
 
             Attacks.AddRange(attacks);
             await InvokeAttacks();

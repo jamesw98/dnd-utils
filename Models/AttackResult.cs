@@ -4,6 +4,7 @@ namespace dnd_utils.Models;
 
 public class AttackResult
 {
+    public string Name { get; set; }
     public RollDetails AttackDetail { get; set; }
     public RollDetails? UnusedAttackDetail { get; set; } // this is used in the case of (dis)advantage
     public RollDetails DamageDetail { get; set; }

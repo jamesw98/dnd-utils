@@ -11,6 +11,8 @@
         <div class="d-flex">
             @if (CombatManagerLayout)
             {
+                <MudTextField T="string" Label="Attack Name" Required="true" RequiredError="Attack Name is required!" @ref="_attackName"/>
+                <MudSpacer/>
                 <MudSelect @bind-SelectedValues="_creaturesToHit" MultiSelection="true" T="Monster" Label="Targeted Creatures" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var c in Creatures)
                     {
@@ -118,6 +120,8 @@
     
     private MudTextField<int> _fixedDamage;
 
+    private MudTextField<string> _attackName;
+
     private async Task InvokeAttacks()
     {
         await AttacksChanged.InvokeAsync(Attacks);
@@ -141,11 +145,12 @@
 
     private async Task CalcAttacks()
     {
-        await ClearAttacks();
+        // await ClearAttacks();
 
         try
         {
             var attacks = AttackService.CalculateAttackResults(
+                _attackName.Value,
                 _attackNum.Value,
                 _toHitMod.Value,
                 CombatManagerLayout ? 0 : _ac.Value,

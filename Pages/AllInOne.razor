@@ -4,7 +4,7 @@
 
 @inject AttackService AttackService
 
-<MudContainer MaxWidth="MaxWidth.Large">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <MudText Typo="Typo.h2">
         D&D All In One
     </MudText>
@@ -18,9 +18,9 @@
 </MudContainer>
 <br/>
 
-<MudContainer MaxWidth="MaxWidth.Large">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <MudGrid>
-        <MudItem xs="12" sm="7">
+        <MudItem xs="16" sm="7">
             <MudText Typo="Typo.h4">Inputs</MudText>
             <MudExpansionPanels MultiExpansion="true">
                 <MudExpansionPanel Text="Creature Creator">
@@ -31,7 +31,7 @@
                 </MudExpansionPanel>
             </MudExpansionPanels>
         </MudItem>
-        <MudItem xs="12" sm="5">
+        <MudItem xs="16" sm="5">
             <MudText Typo="Typo.h4">Creatures</MudText>
             <MudPaper Class="pa-4">
                 <MudTable Items="_creatures" Breakpoint="Breakpoint.Md">

@@ -83,6 +83,7 @@ public class AttackService
         int damageDieNum,
         int damageDieType,
         int damageModifier,
+        DamageType type,
         bool hideMisses,
         bool hasAdvantage,
         bool hasDisadvantage,
@@ -101,7 +102,8 @@ public class AttackService
             var currentAttack = new AttackResult
             {
                 Name = attackName,
-                AcToBeat = acToBeat
+                AcToBeat = acToBeat,
+                Type = type
             };
 
             RollDetails usedToHitRoll;

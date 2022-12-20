@@ -102,7 +102,7 @@
     private IEnumerable<Monster> _creaturesToHit = new HashSet<Monster>();
 
     private List<DamageType> _damageTypes = Enum.GetValues<DamageType>().ToList();
-    private DamageType _damageType = DamageType.Acid;
+    private DamageType _damageType;
 
     private bool _hideMisses = false;
     private bool _advantage = false;
@@ -157,6 +157,7 @@
                 _damageNum.Value,
                 _damageDie.Value,
                 _damageMod.Value,
+                _damageType,
                 _hideMisses,
                 _advantage,
                 _disadvantage,

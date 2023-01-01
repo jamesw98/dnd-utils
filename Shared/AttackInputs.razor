@@ -129,7 +129,7 @@
 
     private async Task InvokeCreatures()
     {
-        await AttacksChanged.InvokeAsync(Attacks);
+        await CreaturesChanged.InvokeAsync(Creatures);
     }
 
     private async Task ClearAttacks()

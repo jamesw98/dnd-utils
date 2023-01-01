@@ -13,6 +13,23 @@ public class AttackService
         _dice = dice;
     }
 
+    public AttackResult ReRoll(AttackResult ar, List<Monster> creaturesToHit)
+    {
+        // these will never be null in this case                
+        var newAttackDetails = _dice.RollDetailed(ar.AttackDetail.Num ?? -1, ar.AttackDetail.Die ?? -1,
+            ar.AttackDetail.Mod ?? -1);
+        
+        var newDamageDetails = _dice.RollDetailed(ar.DamageDetail.Num ?? -1, ar.DamageDetail.Die ?? -1,
+            ar.DamageDetail.Mod ?? -1);
+
+        ar.AttackDetail = newAttackDetails;
+        ar.DamageDetail = newDamageDetails;
+        ar.Damange = newDamageDetails.Total;
+        ar.CreaturesTargeted = creaturesToHit;
+
+        return ar;
+    }
+
     /// <summary>
     /// used for dealing damage in the combat manager
     /// </summary>

@@ -76,7 +76,7 @@
                         <MudTh>Damage Roll</MudTh>
                         <MudTh>Crit?</MudTh>
                         <MudTh>Info</MudTh>
-                        @* <MudTh>Replay</MudTh> *@
+                        <MudTh>Replay</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@context.Name</MudTd>
@@ -89,9 +89,9 @@
                         <MudTd>
                             <MudIconButton Icon="@Icons.Material.Outlined.Info" aria-label="info" OnClick="async () => { await OnButtonClicked(context); }"></MudIconButton>
                         </MudTd>
-                        @* <MudTd> *@
-                        @*     <MudIconButton Icon="@Icons.Material.Outlined.Replay" aria-label="replay" OnClick="async () => { await OnButtonClicked(context); }"></MudIconButton> *@
-                        @* </MudTd> *@
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Replay" aria-label="replay" OnClick="async () => { await Replay(context); }"></MudIconButton>
+                        </MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
@@ -107,10 +107,17 @@
     [Inject]
     private IDialogService DialogService { get; set; }
 
-    // private async Task Replay(AttackResult ar)
-    // {
-    //     AttackService.DealDamage()
-    // }
+    private async Task Replay(AttackResult ar)
+    {
+        var parameters = new DialogParameters
+        {
+            ["AttackToReplay"] = ar,
+            ["Attacks"] = _attacks,
+            ["Creatures"] = _creatures
+        };
+
+        await DialogService.ShowAsync<ReplayAttack>("Replay Attack", parameters);
+    }
 
     private async Task OnButtonClicked(AttackResult ar)
     {

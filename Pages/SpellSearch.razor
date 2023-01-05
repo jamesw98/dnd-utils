@@ -1,4 +1,4 @@
-﻿@page "/spells"
+@page "/spells"
 @using dnd_utils.Models
 @using System.Text.RegularExpressions
 @using System.Web
@@ -15,7 +15,7 @@
     <MudItem xs="12" sm="12">
         <MudPaper Class="pa-4">
             <div class="d-flex">
-                <MudAutocomplete T="string" Label="Spells" @bind-Value="_spellName" SearchFunc="@Search"/>
+                <MudAutocomplete T="string" Label="Spells" @bind-Value="_spellName" SearchFunc="@Search" MaxItems="null"/>
                 <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="GetSpell"/>
             </div>
         </MudPaper>

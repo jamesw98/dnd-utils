@@ -7,7 +7,7 @@
   "linkerEnabled": true,
   "resources": {
     "assembly": {
-      "dnd-utils.dll": "sha256-FJKchnKv3TTmEeI6cKMv90gTlSgd8GxlVIfTWMEysUs=",
+      "dnd-utils.dll": "sha256-np4+Jai2SeQTGMCbtS+TGOk3B2Mm4lO40UUxWGkHHOc=",
       "Microsoft.AspNetCore.Components.dll": "sha256-d8GzH3PXVGLPWalzam6Py+tSEr0cgOwhGACHBil+Oxw=",
       "Microsoft.AspNetCore.Components.Forms.dll": "sha256-3SUOUqqapHhh85LmDZm84Qreqcj3Gy5qHzOLd\/O2RZ8=",
       "Microsoft.AspNetCore.Components.Web.dll": "sha256-gs1ggD5GB\/1DLpceXdv7F9EAUSKPb4\/hCdV76Xk9mx0=",

@@ -15,7 +15,7 @@
     <MudItem xs="12" sm="12">
         <MudPaper Class="pa-4">
             <div class="d-flex">
-                <MudAutocomplete T="string" Label="Spells" @bind-Value="_spellName" SearchFunc="@Search" MaxItems="null"/>
+                <MudAutocomplete T="string" Label="Spells" @bind-Value="_spellName" SearchFunc="@Search" MaxItems="30"/>
                 <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="GetSpell"/>
             </div>
         </MudPaper>

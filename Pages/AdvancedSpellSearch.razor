@@ -1,5 +1,141 @@
-﻿<h3>AdvancedSpellSearch</h3>
+﻿@page "/spells-advanced"
+@using dnd_utils.Models
+@using dnd_utils.Services
+@using dnd_utils.Exceptions
+
+@inject SearchService SearchService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2">
+        D&D Spell Search
+    </MudText>
+</MudContainer>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudItem xs="12" sm="12">
+        <MudText Typo="Typo.h5">Filter by:</MudText>
+        <MudPaper Class="pa-4">
+            <div class="d-flex">
+                <MudSelect @bind-SelectedValues="_selectedSchools" MultiSelection="true" T="string" Label="School" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var school in _schools)
+                    {
+                        <MudSelectItem T="string" Value="@school"/>
+                    }
+                </MudSelect>
+                <MudSpacer/>
+                <MudSelect @bind-SelectedValues="_selectedLevels" MultiSelection="true" T="int" Label="Level" AnchorOrigin="Origin.BottomCenter">
+                    @for (int i = 0; i <= 9; i++)
+                    {
+                        <MudSelectItem T="int" Value="@i"/>
+                    }
+                </MudSelect>
+            </div>
+        </MudPaper>
+        <br/>
+        <MudPaper Class="pa-4">
+            <div class="d-flex">
+                @* <MudInput T="string" Label="Spell" @bind-Value="_spellName"/> *@
+                <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="FindSpells"/>
+            </div>
+        </MudPaper>
+    </MudItem>
+    <br/>
+    @if (_results.Any())
+    {
+        <MudPaper Class="pa-4">
+            <MudTable @ref="@_table" Items="@_results" RowsPerPage="8" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Level</MudTh>
+                    <MudTh>School</MudTh>
+                    <MudTh>In Lists</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Name</MudTd>
+                    <MudTd>@(context.Level == 0 ? "Cantrip" : context.Level)</MudTd>
+                    <MudTd>@($"{context.School[0].ToString().ToUpper()}{context.School[1..]}")</MudTd>
+                    <MudTd>@string.Join(", ", context.InLists)</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudPagination SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
+                </PagerContent>
+            </MudTable>
+        </MudPaper>
+    }
+    else
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+    }
+</MudContainer>
 
 @code {
-    
+    private string? _spellName;
+    private List<Spell> _allSpells = new();
+    private Options? _options;
+
+    private Spell? _spell;
+    private List<Spell> _results = new();
+
+    private MudTable<Spell> _table;
+
+    private string[] _schools =
+    {
+        "abjuration", "conjuration", "divination", "enchantment", "evocation", "illusion", "necromancy", "transmutation"
+    };
+
+    private IEnumerable<string> _selectedSchools = new HashSet<string>();
+    private IEnumerable<int> _selectedLevels = new HashSet<int>();
+
+    private void PageChanged(int i)
+    {
+        _table.NavigateTo(i - 1);
+    }
+
+    private async Task<IEnumerable<string>> Search(string query)
+    {
+        if (string.IsNullOrEmpty(query))
+            return Array.Empty<string>();
+
+        var spells = _allSpells
+            .Select(x => x.Name)
+            .Where(x => x.Contains(query, StringComparison.InvariantCultureIgnoreCase));
+
+        return spells;
+    }
+
+    private void FindSpells()
+    {
+        List<Spell> spells = _allSpells.ToList();
+        if (_selectedSchools.Any())
+            spells = spells.Where(x => _selectedSchools.Contains(x.School.ToLower())).ToList();
+
+        if (_selectedLevels.Any())
+            spells = spells.Where(x => _selectedLevels.Contains(x.Level)).ToList();
+
+        _results = spells;
+    }
+
+    private async Task ViewSpell()
+    {
+        if (_spellName == null)
+            return;
+
+        _spell = await SearchService.GetSpell(_spellName);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _options = await SearchService.GetSpellOptions();
+            _allSpells = await SearchService.GetAllSpells();
+            _results = _allSpells;
+        }
+        catch (NotFoundException nfe)
+        {
+            Snackbar.Add(nfe.Message, Severity.Error);
+        }
+    }
+
 }

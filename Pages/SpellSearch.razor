@@ -1,9 +1,8 @@
 ﻿@page "/spells"
 @using dnd_utils.Models
-@using System.Text.RegularExpressions
-@using System.Web
+@using dnd_utils.Services
 
-@inject HttpClient Client
+@inject SearchService SearchService
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
@@ -16,29 +15,21 @@
         <MudPaper Class="pa-4">
             <div class="d-flex">
                 <MudAutocomplete T="string" Label="Spells" @bind-Value="_spellName" SearchFunc="@Search"/>
-                <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="GetSpell"/>
+                <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="ViewSpell"/>
             </div>
         </MudPaper>
     </MudItem>
+    <br/>
     @if (_spell != null)
     {
-        <br/>
-        <MudItem xs="12" sm="12">
-            <MudPaper Class="pa-4">
-                <MudText Typo="Typo.h3">
-                    @_spell.Name
-                </MudText>
-                <MudDivider/>
-                <br/>
-                @((MarkupString)Regex.Replace(HttpUtility.HtmlEncode(_spell.PageContent), "\r?\n|\r", "<br /><br />"))
-            </MudPaper>
-        </MudItem>
+        <SpellContentComponent Spell="_spell"/>
     }
 </MudContainer>
 
 @code {
     private string? _spellName;
     private List<string> _spells = new();
+    
     private Spell? _spell = null;
 
     private async Task<IEnumerable<string>> Search(string query)
@@ -48,28 +39,21 @@
 
         var spells = _spells
             .Where(x => x.Contains(query, StringComparison.InvariantCultureIgnoreCase));
-
+        
         return spells;
     }
 
-    private async Task GetSpell()
+    private async Task ViewSpell()
     {
         if (_spellName == null)
             return;
 
-        var fixedSpellName = _spellName.ToLower().Replace(' ', '-').Replace('/', '-');
-
-        var spell = await Client.GetFromJsonAsync<Spell>($"spells/{fixedSpellName}.json");
-
-        if (spell == null)
-            return;
-
-        _spell = spell;
+        _spell = await SearchService.GetSpell(_spellName);
     }
 
     protected override async Task OnInitializedAsync()
     {
-        var tempSpells = await Client.GetFromJsonAsync<List<string>>("spells/spell-list.json");
+        var tempSpells = await SearchService.GetSpellList();
 
         if (tempSpells != null)
             _spells = tempSpells;

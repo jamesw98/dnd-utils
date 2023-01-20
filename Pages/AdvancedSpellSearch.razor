@@ -5,10 +5,11 @@
 
 @inject SearchService SearchService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
-        D&D Spell Search
+        D&D Advanced Spell Search~
     </MudText>
 </MudContainer>
 
@@ -17,6 +18,8 @@
         <MudText Typo="Typo.h5">Filter by:</MudText>
         <MudPaper Class="pa-4">
             <div class="d-flex">
+                <MudInput T="string" Label="Spell" @bind-Value="_spellName"/>
+                <MudSpacer/>
                 <MudSelect @bind-SelectedValues="_selectedSchools" MultiSelection="true" T="string" Label="School" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var school in _schools)
                     {
@@ -30,12 +33,44 @@
                         <MudSelectItem T="int" Value="@i"/>
                     }
                 </MudSelect>
+                <MudSpacer/>
+                <MudSelect @bind-SelectedValues="_selectedLists" MultiSelection="true" T="string" Label="In Lists" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var list in _lists)
+                    {
+                        <MudSelectItem T="string" Value="@list"/>
+                    }
+                </MudSelect>
             </div>
-        </MudPaper>
-        <br/>
-        <MudPaper Class="pa-4">
+            <br/>
             <div class="d-flex">
-                @* <MudInput T="string" Label="Spell" @bind-Value="_spellName"/> *@
+                <MudSelect @bind-SelectedValues="_selectedDurations" MultiSelection="true" T="string" Label="Duration" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var duration in _options.Durations)
+                    {
+                        <MudSelectItem T="string" Value="@duration"/>
+                    }
+                </MudSelect>
+                <MudSpacer/>
+                <MudSelect @bind-SelectedValues="_selectedRanges" MultiSelection="true" T="string" Label="Range" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var range in _options.Ranges)
+                    {
+                        <MudSelectItem T="string" Value="@range"/>
+                    }
+                </MudSelect>
+                <MudSpacer/>
+                <MudSelect @bind-SelectedValues="_selectedCastingTimes" MultiSelection="true" T="string" Label="Casting Time" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var time in _options.CastingTimes)
+                    {
+                        <MudSelectItem T="string" Value="@time"/>
+                    }
+                </MudSelect>
+                <MudSpacer/>
+                <MudSelect @bind-SelectedValues="_selectedSources" MultiSelection="true" T="string" Label="Source" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var source in _options.Sources)
+                    {
+                        <MudSelectItem T="string" Value="@source"/>
+                    }
+                </MudSelect>
+                <MudSpacer/>
                 <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="FindSpells"/>
             </div>
         </MudPaper>
@@ -50,12 +85,19 @@
                     <MudTh>Level</MudTh>
                     <MudTh>School</MudTh>
                     <MudTh>In Lists</MudTh>
+                    <MudTh>View</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd>@context.Name</MudTd>
                     <MudTd>@(context.Level == 0 ? "Cantrip" : context.Level)</MudTd>
                     <MudTd>@($"{context.School[0].ToString().ToUpper()}{context.School[1..]}")</MudTd>
                     <MudTd>@string.Join(", ", context.InLists)</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.RemoveRedEye"
+                                       Color="Color.Primary"
+                                       Variant="Variant.Filled"
+                                       OnClick="async () => { await ViewSpell(context.Name); }"/>
+                    </MudTd>
                 </RowTemplate>
                 <PagerContent>
                     <MudPagination SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
@@ -72,19 +114,29 @@
 @code {
     private string? _spellName;
     private List<Spell> _allSpells = new();
-    private Options? _options;
+    private Options _options = new();
 
     private Spell? _spell;
     private List<Spell> _results = new();
 
     private MudTable<Spell> _table;
 
-    private string[] _schools =
+    private readonly string[] _schools =
     {
         "abjuration", "conjuration", "divination", "enchantment", "evocation", "illusion", "necromancy", "transmutation"
     };
 
+    private readonly string[] _lists =
+    {
+        "artificer", "bard", "cleric", "druid", "paladin", "ranger", "sorcerer", "warlock", "wizard"
+    };
+
     private IEnumerable<string> _selectedSchools = new HashSet<string>();
+    private IEnumerable<string> _selectedLists = new HashSet<string>();
+    private IEnumerable<string> _selectedSources = new HashSet<string>();
+    private IEnumerable<string> _selectedDurations = new HashSet<string>();
+    private IEnumerable<string> _selectedRanges = new HashSet<string>();
+    private IEnumerable<string> _selectedCastingTimes = new HashSet<string>();
     private IEnumerable<int> _selectedLevels = new HashSet<int>();
 
     private void PageChanged(int i)
@@ -103,25 +155,63 @@
 
         return spells;
     }
-
+    
+    // primus forgive me for the code below
     private void FindSpells()
     {
-        List<Spell> spells = _allSpells.ToList();
+        var spells = _allSpells.ToList();
         if (_selectedSchools.Any())
             spells = spells.Where(x => _selectedSchools.Contains(x.School.ToLower())).ToList();
 
         if (_selectedLevels.Any())
             spells = spells.Where(x => _selectedLevels.Contains(x.Level)).ToList();
 
+        if (_selectedLists.Any())
+            spells = spells
+                .Where(spell =>
+                    _selectedLists
+                        .Any(list => spell.InLists
+                            .Select(l => l.ToLower()).Contains(list.ToLower())))
+                .ToList();
+
+        if (_selectedSources.Any())
+            spells = spells
+                .Where(spell => _selectedSources
+                    .Select(s => s.ToLower())
+                    .Contains(spell.Source.ToLower()))
+                .ToList();
+
+        if (_selectedDurations.Any())
+            spells = spells
+                .Where(spell => _selectedDurations
+                    .Any(duration => spell.Duration.ToLower().StartsWith(duration.ToLower())))
+                .ToList();
+
+        if (_selectedRanges.Any())
+            spells = spells
+                .Where(spell => _selectedRanges
+                    .Any(range => spell.Range.ToLower().StartsWith(range.ToLower())))
+                .ToList();
+        
+        if (_selectedCastingTimes.Any())
+            spells = spells
+                .Where(spell => _selectedCastingTimes
+                    .Any(time => spell.CastingTime.ToLower().StartsWith(time.ToLower())))
+                .ToList();
+
+        if (_spellName != null && _spellName.Any())
+            spells = spells.Where(x => x.Name.ToLower().Contains(_spellName.ToLower())).ToList();
+        
         _results = spells;
     }
 
-    private async Task ViewSpell()
+    private async Task ViewSpell(string name)
     {
-        if (_spellName == null)
-            return;
+        var spell = await SearchService.GetSpell(name);
+        var parameters = new DialogParameters { { "Spell", spell } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
 
-        _spell = await SearchService.GetSpell(_spellName);
+        await DialogService.ShowAsync<SpellDialog>("", parameters, options);
     }
 
     protected override async Task OnInitializedAsync()

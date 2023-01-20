@@ -11,8 +11,8 @@ public class SearchService
     public SearchService(HttpClient client)
     {
         _client = client;
-    } 
-    
+    }
+
     public async Task<Spell> GetSpell(string name)
     {
         var fixedSpellName = name.ToLower()
@@ -22,16 +22,10 @@ public class SearchService
         
         return await GetFromJson<Spell>($"spells/{fixedSpellName}.json");
     }
-
+    
     public async Task<List<Spell>> GetAllSpells()
     {
-        List<Spell> spells = new(); 
-        var spellList = await GetSpellList();
-        
-        foreach (var spell in spellList)
-            spells.Add(await GetSpell(spell));
-
-        return spells;
+        return await GetFromJson<List<Spell>>("spells/spells-no-content.json");
     }
 
     public async Task<Options> GetSpellOptions()

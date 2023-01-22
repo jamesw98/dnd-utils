@@ -71,6 +71,8 @@
                     }
                 </MudSelect>
                 <MudSpacer/>
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Inherit" Edge="Edge.Start" OnClick="Reset"/>
+                <MudSpacer/>
                 <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="FindSpells"/>
             </div>
         </MudPaper>
@@ -116,7 +118,6 @@
     private List<Spell> _allSpells = new();
     private Options _options = new();
 
-    private Spell? _spell;
     private List<Spell> _results = new();
 
     private MudTable<Spell> _table;
@@ -144,18 +145,20 @@
         _table.NavigateTo(i - 1);
     }
 
-    private async Task<IEnumerable<string>> Search(string query)
+    private void Reset()
     {
-        if (string.IsNullOrEmpty(query))
-            return Array.Empty<string>();
-
-        var spells = _allSpells
-            .Select(x => x.Name)
-            .Where(x => x.Contains(query, StringComparison.InvariantCultureIgnoreCase));
-
-        return spells;
+        _selectedSchools = Enumerable.Empty<string>();
+        _selectedDurations = Enumerable.Empty<string>();
+        _selectedSchools = Enumerable.Empty<string>();
+        _selectedLists = Enumerable.Empty<string>();
+        _selectedSources = Enumerable.Empty<string>();
+        _selectedDurations = Enumerable.Empty<string>();
+        _selectedRanges = Enumerable.Empty<string>();
+        _selectedCastingTimes = Enumerable.Empty<string>();
+        _selectedLevels = Enumerable.Empty<int>();
+        _spellName = null;
     }
-    
+
     // primus forgive me for the code below
     private void FindSpells()
     {
@@ -192,7 +195,7 @@
                 .Where(spell => _selectedRanges
                     .Any(range => spell.Range.ToLower().StartsWith(range.ToLower())))
                 .ToList();
-        
+
         if (_selectedCastingTimes.Any())
             spells = spells
                 .Where(spell => _selectedCastingTimes
@@ -201,7 +204,7 @@
 
         if (_spellName != null && _spellName.Any())
             spells = spells.Where(x => x.Name.ToLower().Contains(_spellName.ToLower())).ToList();
-        
+
         _results = spells;
     }
 

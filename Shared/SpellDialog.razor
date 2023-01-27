@@ -1,4 +1,5 @@
 ﻿@using dnd_utils.Models
+@inject NavigationManager NavigationManager
 
 <MudDialog DisableSidePadding="true">
     <DialogContent>
@@ -8,6 +9,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Filled" OnClick="() => { MudDialog.Close(); }">Close</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ViewSpellPage">View Dedicated Spell Page</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -17,4 +19,12 @@
     
     [Parameter]
     public Spell Spell { get; set; }
+    
+    [Parameter]
+    public int SpellId { get; set; }
+
+    private void ViewSpellPage()
+    {
+        NavigationManager.NavigateTo($"/spell/{SpellId}");
+    }
 }

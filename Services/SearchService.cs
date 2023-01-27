@@ -22,6 +22,17 @@ public class SearchService
         
         return await GetFromJson<Spell>($"spells/{fixedSpellName}.json");
     }
+
+    public async Task<Spell> GetSpellForId(int id)
+    {
+        var spellsNoContent = await GetAllSpells();
+        var spellNoContent = spellsNoContent.FirstOrDefault(x => x.SpellId == id);
+
+        if (spellNoContent == null)
+            throw new NotFoundException();
+
+        return await GetSpell(spellNoContent.Name);
+    }
     
     public async Task<List<Spell>> GetAllSpells()
     {

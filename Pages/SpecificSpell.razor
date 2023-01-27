@@ -1,6 +1,40 @@
-﻿@page "/SpecificSpell"
-<h3>SpecificSpell</h3>
+﻿@page "/spell/{SpellId:int}"
+@using dnd_utils.Models
+@using dnd_utils.Services
+@using dnd_utils.Exceptions
+
+@inject SearchService SearchService
+
+@if (_spell == null)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+}
+else if (_notFound)
+{
+    <MudText Typo="Typo.h3">Could not find spell</MudText>
+}
+else
+{
+    <SpellContentComponent Spell="_spell"/>
+}
 
 @code {
-    
+    [Parameter]
+    public int SpellId { get; set; }
+
+    private Spell? _spell;
+    private bool _notFound = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _spell = await SearchService.GetSpellForId(SpellId);
+            Console.WriteLine();
+        }
+        catch (NotFoundException)
+        {
+            _notFound = true;
+        }
+    }
 }

@@ -98,7 +98,7 @@
                         <MudIconButton Icon="@Icons.Material.Filled.RemoveRedEye"
                                        Color="Color.Primary"
                                        Variant="Variant.Filled"
-                                       OnClick="async () => { await ViewSpell(context.Name); }"/>
+                                       OnClick="async () => { await ViewSpell(context.Name, context.SpellId); }"/>
                     </MudTd>
                 </RowTemplate>
                 <PagerContent>
@@ -208,10 +208,10 @@
         _results = spells;
     }
 
-    private async Task ViewSpell(string name)
+    private async Task ViewSpell(string name, int spellId)
     {
         var spell = await SearchService.GetSpell(name);
-        var parameters = new DialogParameters { { "Spell", spell } };
+        var parameters = new DialogParameters { { "Spell", spell }, { "SpellId", spellId } };
         var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
 
         await DialogService.ShowAsync<SpellDialog>("", parameters, options);

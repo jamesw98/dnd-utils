@@ -2,6 +2,7 @@
 
 public class Spell
 {
+    public int SpellId { get; set; }
     public string Name { get; set; }
     public string School { get; set; }
     public int Level { get; set; }

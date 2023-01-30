@@ -12,7 +12,7 @@ public class SearchService
     {
         _client = client;
     }
-
+    
     public async Task<Spell> GetSpell(string name)
     {
         var fixedSpellName = name.ToLower()
@@ -21,6 +21,27 @@ public class SearchService
             .Replace("/", "-");
         
         return await GetFromJson<Spell>($"spells/{fixedSpellName}.json");
+    }
+
+    public async Task<Item> GetItem(string name)
+    {
+        var fixedItemName = name.ToLower()
+            .Replace(": ", "-")
+            .Replace(' ', '-')
+            .Replace("/", "-");
+        
+        return await GetFromJson<Item>($"items/{fixedItemName}.json");
+    }
+    
+    public async Task<Item> GetItemForId(int id)
+    {
+        var itemsNoContext = await GetAllItems();
+        var itemNoContent = itemsNoContext.FirstOrDefault(x => x.Id == id);
+        
+        if (itemNoContent == null)
+            throw new NotFoundException();
+        
+        return await GetItem(itemNoContent.Name);
     }
 
     public async Task<Spell> GetSpellForId(int id)
@@ -39,14 +60,24 @@ public class SearchService
         return await GetFromJson<List<Spell>>("spells/spells-no-content.json");
     }
 
-    public async Task<Options> GetSpellOptions()
+    public async Task<SpellOptions> GetSpellOptions()
     {
-        return await GetFromJson<Options>("spells/options.json");
+        return await GetFromJson<SpellOptions>("spells/options.json");
     }
 
     public async Task<List<string>> GetSpellList()
     {
         return await GetFromJson<List<string>>("spells/spell-list.json");
+    }
+
+    public async Task<List<Item>> GetAllItems()
+    {
+        return await GetFromJson<List<Item>>("items/items-no-content.json");
+    }
+
+    public async Task<ItemOptions> GetItemOptions()
+    {
+        return await GetFromJson<ItemOptions>("items/options.json");
     }
 
     private async Task<T> GetFromJson<T>(string path)

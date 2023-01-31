@@ -1,0 +1,62 @@
+@page "/spells-old"
+@using dnd_utils.Models
+@using dnd_utils.Services
+
+@inject SearchService SearchService
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2">
+        D&D Spell Search
+    </MudText>
+</MudContainer>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudItem xs="12" sm="12">
+        <MudPaper Class="pa-4">
+            <div class="d-flex">
+                <MudAutocomplete T="string" Label="Spells" @bind-Value="_spellName" SearchFunc="@Search"/>
+                <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="ViewSpell"/>
+            </div>
+        </MudPaper>
+    </MudItem>
+    <br/>
+    @if (_spell != null)
+    {
+        <SpellContentComponent Spell="_spell"/>
+    }
+</MudContainer>
+
+@code {
+    private string? _spellName;
+    private List<string> _spells = new();
+    
+    private Spell? _spell = null;
+
+    private async Task<IEnumerable<string>> Search(string query)
+    {
+        if (string.IsNullOrEmpty(query))
+            return Array.Empty<string>();
+
+        var spells = _spells
+            .Where(x => x.Contains(query, StringComparison.InvariantCultureIgnoreCase));
+        
+        return spells;
+    }
+
+    private async Task ViewSpell()
+    {
+        if (_spellName == null)
+            return;
+
+        _spell = await SearchService.GetSpell(_spellName);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tempSpells = await SearchService.GetSpellList();
+
+        if (tempSpells != null)
+            _spells = tempSpells;
+    }
+
+}

@@ -1,0 +1,16 @@
+{
+    "Name": "Vorpal Power Word Kill",
+    "School": "evocation",
+    "Level": 10,
+    "PageContent": "10th-Level evocation\nCasting Time: reaction\nRange: self\nComponents: V\n Duration: instantaneous\nKill\nSpell Lists. Wizard",
+    "InLists": [
+        "Wizard"
+    ],
+    "Source": "Player\u0027s Handbook",
+    "CastingTime": "reaction",
+    "Components": [
+        "V"
+    ],
+    "Range": "self",
+    "Duration": "instantaneous"
+}

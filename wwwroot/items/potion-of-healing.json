@@ -1,0 +1,9 @@
+{
+  "Id": 552,
+  "Name": "Potion of Healing",
+  "PageContent": "\n\nSource: Dungeon Master\u0027s Guide\nPotion, rarity varies\nYou regain hit points when you drink this potion. The number of hit points depends on the potion\u0027s rarity, as shown in the Potions of Healing table. Whatever its potency, the potion\u0027s red liquid glimmers when agitated.\n\n\nPotions of Healing\n\n\n\n\nPotion of \u0026#8230;\nRarity\nHP Regained\n\n\nHealing\nCommon\n2d4 \u002B 2\n\n\nGreater healing\nUncommon\n4d4 \u002B 4\n\n\nSuperior healing\nRare\n8d4 \u002B 8\n\n\nSupreme healing\nVery rare\n10d4 \u002B 20\n\n\n\n\n\n\n",
+  "Source": "Dungeon Master\u0027s Guide",
+  "Type": "potion",
+  "Rarity": "rarity varies",
+  "RequiresAttunment": false
+}

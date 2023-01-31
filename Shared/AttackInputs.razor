@@ -11,6 +11,8 @@
         <div class="d-flex">
             @if (CombatManagerLayout)
             {
+                <MudTextField T="string" Label="Attack Name" Required="true" RequiredError="Attack Name is required!" @ref="_attackName"/>
+                <MudSpacer/>
                 <MudSelect @bind-SelectedValues="_creaturesToHit" MultiSelection="true" T="Monster" Label="Targeted Creatures" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var c in Creatures)
                     {
@@ -50,7 +52,7 @@
 </MudPaper>
 <MudPaper Class="pa-4 mt-4">
     <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Refresh" OnClick="CalcAttacks">Roll!</MudButton>
-    <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="ClearAttacks">Clear</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="ClearAttacks">Clear History</MudButton>
 </MudPaper>
 <br/>
 <MudText Typo="Typo.h4">Optional</MudText>
@@ -100,7 +102,7 @@
     private IEnumerable<Monster> _creaturesToHit = new HashSet<Monster>();
 
     private List<DamageType> _damageTypes = Enum.GetValues<DamageType>().ToList();
-    private DamageType _damageType = DamageType.Acid;
+    private DamageType _damageType;
 
     private bool _hideMisses = false;
     private bool _advantage = false;
@@ -118,6 +120,8 @@
     
     private MudTextField<int> _fixedDamage;
 
+    private MudTextField<string> _attackName;
+
     private async Task InvokeAttacks()
     {
         await AttacksChanged.InvokeAsync(Attacks);
@@ -125,7 +129,7 @@
 
     private async Task InvokeCreatures()
     {
-        await AttacksChanged.InvokeAsync(Attacks);
+        await CreaturesChanged.InvokeAsync(Creatures);
     }
 
     private async Task ClearAttacks()
@@ -141,17 +145,19 @@
 
     private async Task CalcAttacks()
     {
-        await ClearAttacks();
+        // await ClearAttacks();
 
         try
         {
             var attacks = AttackService.CalculateAttackResults(
+                _attackName.Value,
                 _attackNum.Value,
                 _toHitMod.Value,
                 CombatManagerLayout ? 0 : _ac.Value,
                 _damageNum.Value,
                 _damageDie.Value,
                 _damageMod.Value,
+                _damageType,
                 _hideMisses,
                 _advantage,
                 _disadvantage,

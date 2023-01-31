@@ -13,6 +13,31 @@ public class AttackService
         _dice = dice;
     }
 
+    public AttackResult ReRoll(AttackResult ar, List<Monster> creaturesToHit)
+    {
+        // these will never be null in this case                
+        var newAttackDetails = _dice.RollDetailed(ar.AttackDetail.Num ?? -1, ar.AttackDetail.Die ?? -1,
+            ar.AttackDetail.Mod ?? -1);
+        
+        var newDamageDetails = _dice.RollDetailed(ar.DamageDetail.Num ?? -1, ar.DamageDetail.Die ?? -1,
+            ar.DamageDetail.Mod ?? -1);
+
+        ar.AttackDetail = newAttackDetails;
+        ar.DamageDetail = newDamageDetails;
+        ar.Damange = newDamageDetails.Total;
+        ar.CreaturesTargeted = creaturesToHit;
+
+        return ar;
+    }
+
+    /// <summary>
+    /// used for dealing damage in the combat manager
+    /// </summary>
+    /// <param name="creatures">all the creatures in the manager</param>
+    /// <param name="creaturesToHit">the creatures affected by this attack</param>
+    /// <param name="attacks">the attacks to be dealt</param>
+    /// <param name="savingThrow">whether or not this is a saving throw</param>
+    /// <returns>an updated list of creatures with reduced hp (if the attacks hit)</returns>
     public List<Monster> DealDamage(List<Monster> creatures, IEnumerable<Monster> creaturesToHit,
         List<AttackResult> attacks, bool savingThrow)
     {
@@ -64,15 +89,18 @@ public class AttackService
     /// <param name="hasAdvantage"></param>
     /// <param name="hasDisadvantage"></param>
     /// <param name="autoCrit">if true, every attack will be a crit</param>
+    /// <param name="fixedDamage">if not -1, do not roll for damage</param>
     /// <returns></returns>
     /// <exception cref="IllegalStateException"></exception>
     public List<AttackResult> CalculateAttackResults(
+        string attackName,
         int numberOfAttacks,
         int toHitModifier,
         int acToBeat,
         int damageDieNum,
         int damageDieType,
         int damageModifier,
+        DamageType type,
         bool hideMisses,
         bool hasAdvantage,
         bool hasDisadvantage,
@@ -90,7 +118,9 @@ public class AttackService
         {
             var currentAttack = new AttackResult
             {
-                AcToBeat = acToBeat
+                Name = attackName,
+                AcToBeat = acToBeat,
+                Type = type
             };
 
             RollDetails usedToHitRoll;

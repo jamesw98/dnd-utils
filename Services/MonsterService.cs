@@ -25,6 +25,7 @@ public class MonsterService
             {
                 Initiative = init,
                 HitPoints = hp,
+                MaxHitPoints = hp,
                 PassivePerception = passive,
                 ArmorClass = ac
             });

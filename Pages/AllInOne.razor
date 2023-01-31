@@ -1,23 +1,21 @@
 ﻿@page "/combat"
 @using dnd_utils.Models
+@using dnd_utils.Services
 
-<MudContainer MaxWidth="MaxWidth.Large">
+@inject AttackService AttackService
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <MudText Typo="Typo.h2">
-        D&D All In One
+        D&D Combat Tracker
     </MudText>
     <MudDivider/>
-    <MudText Typo="Typo.body1">
-        Placeholder
-    </MudText>
-    <MudText Typo="Typo.body1">
-        Placeholder
-    </MudText>
 </MudContainer>
 <br/>
 
-<MudContainer MaxWidth="MaxWidth.Large">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <MudGrid>
-        <MudItem xs="12" sm="7">
+        <MudItem xs="16" sm="7">
+            <MudText Typo="Typo.h4">Inputs</MudText>
             <MudExpansionPanels MultiExpansion="true">
                 <MudExpansionPanel Text="Creature Creator">
                     <MonsterInput @bind-Monsters="_creatures"/>
@@ -27,7 +25,8 @@
                 </MudExpansionPanel>
             </MudExpansionPanels>
         </MudItem>
-        <MudItem xs="12" sm="5">
+        <MudItem xs="16" sm="5">
+            <MudText Typo="Typo.h4">Creatures</MudText>
             <MudPaper Class="pa-4">
                 <MudTable Items="_creatures" Breakpoint="Breakpoint.Md">
                     <HeaderContent>
@@ -40,6 +39,7 @@
                         <MudTh>AC</MudTh>
                         <MudTh>Passive</MudTh>
                         <MudTh>HP</MudTh>
+                        <MudTh>Max</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         @if (_savingThrow)
@@ -53,24 +53,39 @@
                         <MudTd>@context.ArmorClass</MudTd>
                         <MudTd>@context.PassivePerception</MudTd>
                         <MudTd>@context.HitPoints</MudTd>
+                        <MudTd>@context.MaxHitPoints</MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
+            <br/>
+            <MudText Typo="Typo.h4">Attack History</MudText>
             <MudPaper Class="pa-4">
                 <MudTable Items="_attacks" Breakpoint="Breakpoint.Md">
                     <HeaderContent>
-                        <MudTh>Attack Roll</MudTh>
+                        <MudTh>Name</MudTh>
+                        @if (!_savingThrow)
+                        {
+                            <MudTh>Attack Roll</MudTh>
+                        }
                         <MudTh>Damage Roll</MudTh>
                         <MudTh>Crit?</MudTh>
                         <MudTh>Info</MudTh>
+                        <MudTh>Replay</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd>@context.AttackDetail.Total</MudTd>
+                        <MudTd>@context.Name</MudTd>
+                        @if (!_savingThrow)
+                        {
+                            <MudTd>@context.AttackDetail.Total</MudTd>
+                        }
                         <MudTd>@context.Damange</MudTd>
                         <MudTd>@(context.Crit ? "Yes" : "No")</MudTd>
                         <MudTd>
                             <MudIconButton Icon="@Icons.Material.Outlined.Info" aria-label="info" OnClick="async () => { await OnButtonClicked(context); }"></MudIconButton>
                         </MudTd>
+                        @* <MudTd> *@
+                        @*     <MudIconButton Icon="@Icons.Material.Outlined.Replay" aria-label="replay" OnClick="async () => { await Replay(context); }"></MudIconButton> *@
+                        @* </MudTd> *@
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
@@ -82,9 +97,21 @@
     private List<Monster> _creatures = new();
     private List<AttackResult> _attacks = new();
     private bool _savingThrow = false;
-    
+
     [Inject]
     private IDialogService DialogService { get; set; }
+
+    private async Task Replay(AttackResult ar)
+    {
+        var parameters = new DialogParameters
+        {
+            ["AttackToReplay"] = ar,
+            ["Attacks"] = _attacks,
+            ["Creatures"] = _creatures
+        };
+
+        await DialogService.ShowAsync<ReplayAttack>("Replay Attack", parameters);
+    }
 
     private async Task OnButtonClicked(AttackResult ar)
     {
@@ -98,4 +125,5 @@
 
         StateHasChanged();
     }
+
 }

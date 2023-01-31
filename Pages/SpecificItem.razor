@@ -1,0 +1,40 @@
+﻿@page "/item/{ItemId:int}"
+@using dnd_utils.Models
+@using dnd_utils.Services
+@using dnd_utils.Exceptions
+
+@inject SearchService SearchService
+
+@if (_item == null)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+}
+else if (_notFound)
+{
+    <MudText Typo="Typo.h3">Could not find item</MudText>
+}
+else
+{
+    <ItemContentComponent Item="_item"/>
+}
+
+@code {
+    [Parameter]
+    public int ItemId { get; set; }
+
+    private Item? _item;
+    private bool _notFound = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _item = await SearchService.GetItemForId(ItemId);
+            Console.WriteLine();
+        }
+        catch (NotFoundException)
+        {
+            _notFound = true;
+        }
+    }
+}

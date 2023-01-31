@@ -44,28 +44,28 @@
             <br/>
             <div class="d-flex">
                 <MudSelect @bind-SelectedValues="_selectedDurations" MultiSelection="true" T="string" Label="Duration" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var duration in _options.Durations)
+                    @foreach (var duration in _spellOptions.Durations)
                     {
                         <MudSelectItem T="string" Value="@duration"/>
                     }
                 </MudSelect>
                 <MudSpacer/>
                 <MudSelect @bind-SelectedValues="_selectedRanges" MultiSelection="true" T="string" Label="Range" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var range in _options.Ranges)
+                    @foreach (var range in _spellOptions.Ranges)
                     {
                         <MudSelectItem T="string" Value="@range"/>
                     }
                 </MudSelect>
                 <MudSpacer/>
                 <MudSelect @bind-SelectedValues="_selectedCastingTimes" MultiSelection="true" T="string" Label="Casting Time" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var time in _options.CastingTimes)
+                    @foreach (var time in _spellOptions.CastingTimes)
                     {
                         <MudSelectItem T="string" Value="@time"/>
                     }
                 </MudSelect>
                 <MudSpacer/>
                 <MudSelect @bind-SelectedValues="_selectedSources" MultiSelection="true" T="string" Label="Source" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var source in _options.Sources)
+                    @foreach (var source in _spellOptions.Sources)
                     {
                         <MudSelectItem T="string" Value="@source"/>
                     }
@@ -116,7 +116,7 @@
 @code {
     private string? _spellName;
     private List<Spell> _allSpells = new();
-    private Options _options = new();
+    private SpellOptions _spellOptions = new();
 
     private List<Spell> _results = new();
 
@@ -221,7 +221,7 @@
     {
         try
         {
-            _options = await SearchService.GetSpellOptions();
+            _spellOptions = await SearchService.GetSpellOptions();
             _allSpells = await SearchService.GetAllSpells();
             _results = _allSpells;
         }

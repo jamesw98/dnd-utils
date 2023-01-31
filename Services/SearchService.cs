@@ -72,7 +72,8 @@ public class SearchService
 
     public async Task<List<Item>> GetAllItems()
     {
-        return await GetFromJson<List<Item>>("items/items-no-content.json");
+        var items = await GetFromJson<List<Item>>("items/items-no-content.json"); 
+        return items.DistinctBy(x => x.Name).ToList();
     }
 
     public async Task<ItemOptions> GetItemOptions()

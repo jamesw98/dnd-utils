@@ -1,0 +1,9 @@
+{
+    "Id": 88,
+    "Name": "Adamantine Armor",
+    "PageContent": "\n\nSource: Dungeon Master\u0027s Guide\nArmor (medium or heavy, but not hide), uncommon\nThis suit of armor is reinforced with adamantine, one of the hardest substances in existence. While you\u0027re wearing it, any critical hit against you becomes a normal hit.\n\n\n\n\n",
+    "Source": "Dungeon Master\u0027s Guide",
+    "Type": "armor",
+    "Rarity": "uncommon",
+    "RequiresAttunment": false
+}

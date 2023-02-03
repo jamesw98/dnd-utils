@@ -35,8 +35,8 @@
 }
 @if (_className != null && _spellSlots != null)
 {
-    <br/>
-    <LimitedSpellSearchBar MaxLevel="@_characterLevel" ClassName="@_className"/>
+    @* <br/> *@
+    @* <LimitedSpellSearchBar MaxLevel="@_characterLevel" ClassName="@_className"/> *@
     <br/>
     <MudContainer MaxWidth="MaxWidth.Large">
         <MudItem xs="12" sm="12">
@@ -49,8 +49,8 @@
                     {
                         var title = $"Level {key}";
                         <MudExpansionPanel Text="@title">
-                            <MudTable Items="@_book.SpellsForLevel[key]">
-                            </MudTable>
+                            @* <MudTable Items="@_book.SpellsForLevel[key]"> *@
+                            @* </MudTable> *@
                         </MudExpansionPanel>
                     }
                 </MudExpansionPanels>

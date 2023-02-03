@@ -1,0 +1,52 @@
+﻿@using dnd_utils.Models
+@using dnd_utils.Services
+@using dnd_utils.Exceptions
+
+@inject SearchService SearchService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudItem xs="12" sm="12">
+        <MudPaper Class="pa-4">
+            <div class="d-flex">
+                <MudAutocomplete T="Spell" Label="Spells" @bind-Value="_spellName" SearchFunc="@Search"/>
+                @* <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="ViewSpell"/> *@
+            </div>
+        </MudPaper>
+    </MudItem>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string ClassName { get; set; }
+    
+    [Parameter]
+    public int MaxLevel { get; set; }
+
+    private List<Spell> _spells = new();
+    private string? _spellName;
+
+    private async Task<IEnumerable<Spell>> Search(string query)
+    {
+        if (string.IsNullOrEmpty(query))
+            return Array.Empty<Spell>();
+
+        var spells = _spells
+            .Where(x => x.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase));
+        
+        return spells;
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var allSpells = await SearchService.GetAllSpells();
+            _spells = allSpells.Where(x => x.Level <= MaxLevel && x.InLists.Contains(ClassName.ToLower())).ToList();
+        }
+        catch (NotFoundException nfe)
+        {
+            Snackbar.Add(nfe.Message, Severity.Error);
+        }
+    }
+}

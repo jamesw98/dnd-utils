@@ -6,7 +6,6 @@
 @inject SearchService SearchService
 @inject ISnackbar Snackbar
 @inject ILocalStorageService Storage
-@inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Large">
@@ -37,7 +36,7 @@
 
 @if (_classes != null)
 {
-    var checkIcon = _allowSpellsFromOtherLists ? @Icons.Material.Filled.Check : @Icons.Material.Filled.Close;
+    var checkIcon = _allowSpellsFromOtherLists ? Icons.Material.Filled.Check : Icons.Material.Filled.Close;
 
     <MudContainer MaxWidth="MaxWidth.Large">
         <MudItem xs="12" sm="12">

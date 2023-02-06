@@ -13,6 +13,26 @@
     </MudText>
 </MudContainer>
 
+@if (_savedBooks.Any())
+{
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudText Typo="Typo.h4">Load Saved Character</MudText>
+        <MudItem xs="12" sm="12">
+            <MudPaper Class="pa-4">
+                <div class="d-flex">
+                    <MudSelect T="Spellbook" @bind-Value="_book" Label="Spellbook" SelectedValuesChanged="async () => { await LoadBook(); }" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var book in _savedBooks)
+                        {
+                            <MudSelectItem T="Spellbook" Value="@book"/>
+                        }
+                    </MudSelect>
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudContainer>
+    <br/>
+}
+
 @if (_classes != null)
 {
     <MudContainer MaxWidth="MaxWidth.Large">
@@ -36,7 +56,7 @@
         </MudItem>
     </MudContainer>
 }
-@if (_className != null && _spellSlots != null)
+@if (_book != null && _spellSlots != null)
 {
     <br/>
     <LimitedSpellSearchBar ParentMethod="@Refresh" SpellsPerLevel="_book.SpellsForLevel" Spells="_possibleSpellsForCharacter"/>
@@ -80,29 +100,43 @@
 @code {
     private string? _characterName;
     private string? _className;
-    
+
     private int _characterLevel = 1;
     private Dictionary<int, int>? _spellSlots;
-    private Spellbook _book = new();
-    
+    private Spellbook? _book;
+
     private List<Spell> _possibleSpellsForCharacter = new();
     private List<string> _savedCharacterNames = new();
     private List<string>? _classes;
     private List<Spellbook> _savedBooks = new();
-    
+
     private async Task GetSpellSlots()
     {
         if (_className != null)
         {
-            await LoadSpells();
-            
             var allSlots = await SearchService.GetSpellSlotsForClass(_className);
             _spellSlots = allSlots[_characterLevel];
+            
+            await LoadSpells(_spellSlots.Keys.Max());
+            
+            _book ??= new Spellbook();
             _book.SlotsForLevel = _spellSlots;
 
             foreach (var slot in _spellSlots.Keys.Where(slot => !_book.SpellsForLevel.ContainsKey(slot)))
                 _book.SpellsForLevel[slot] = new List<Spell>();
         }
+    }
+
+    private async Task LoadBook()
+    {
+        if (_book != null)
+        {
+            _className = _book.Class;
+            _characterLevel = _book.Level;
+            _characterName = _book.Name;
+        }
+
+        await GetSpellSlots();
     }
 
     private async Task LevelChanged(string levelText)
@@ -113,11 +147,11 @@
         await GetSpellSlots();
     }
 
-    private async Task LoadSpells()
+    private async Task LoadSpells(int maxLevel)
     {
         var allSpells = await SearchService.GetAllSpells();
         _possibleSpellsForCharacter = allSpells
-            .Where(x => x.Level <= _characterLevel && x.InLists.Contains(_className))
+            .Where(x => x.Level <= maxLevel && x.InLists.Contains(_className))
             .ToList();
     }
 
@@ -125,16 +159,19 @@
     {
         if (_characterName != null && _className != null)
         {
-            _savedCharacterNames.Add(_characterName);
-            await Storage.SetItemAsync("savedcharacters", _savedCharacterNames);
-
+            if (!_savedCharacterNames.Contains(_characterName))
+            {
+                _savedCharacterNames.Add(_characterName);
+                await Storage.SetItemAsync("savedcharacters", _savedCharacterNames);    
+            }
+            
             _book.Name = _characterName;
             _book.Class = _className;
             _book.Level = _characterLevel;
             await Storage.SetItemAsync($"{_characterName}_book", _book);
-            
+
             Snackbar.Add($"Spellbook \"{_characterName}\" has been saved", Severity.Success);
-            
+
             return;
         }
 
@@ -154,7 +191,7 @@
 
             if (await Storage.ContainKeyAsync("savedcharacters"))
                 _savedCharacterNames = await Storage.GetItemAsync<List<string>>("savedcharacters");
-            
+
             if (_savedCharacterNames.Any())
             {
                 foreach (var name in _savedCharacterNames)
@@ -163,7 +200,7 @@
         }
         catch (Exception e)
         {
-            // have it catch more specific exceptions later
+    // have it catch more specific exceptions later
             Snackbar.Add("An error occured collecting data, please refresh!");
         }
     }

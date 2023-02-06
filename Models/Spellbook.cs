@@ -8,4 +8,9 @@ public class Spellbook
     public Dictionary<int, int>? SlotsForLevel { get; set; }  
     public Dictionary<int, List<Spell>> SpellsForLevel { get; set; } = new();
     public List<Spell> AllSpells { get; set; } = new();
+
+    public override string ToString()
+    {
+        return $"{Name}, {Class}";
+    }
 }

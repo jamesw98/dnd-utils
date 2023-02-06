@@ -7,6 +7,7 @@
 @inject ISnackbar Snackbar
 @inject ILocalStorageService Storage
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
@@ -100,7 +101,7 @@
                                                     Icon="@Icons.Material.Filled.RemoveRedEye"
                                                     Color="Color.Primary"
                                                     Variant="Variant.Filled"
-                                                    OnClick="() => { NavigateToSpell(context.SpellId); }"/>
+                                                    OnClick="async () => { await ViewSpell(context.Name, context.SpellId); }"/>
                                             </MudTd>
                                             <MudTd>
                                                 <MudIconButton
@@ -220,9 +221,13 @@
         StateHasChanged();
     }
 
-    private void NavigateToSpell(int spellId)
+    private async Task ViewSpell(string name, int spellId)
     {
-        NavigationManager.NavigateTo($"/spell/{spellId}");
+        var spell = await SearchService.GetSpell(name);
+        var parameters = new DialogParameters { { "Spell", spell }, { "SpellId", spellId } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
+
+        await DialogService.ShowAsync<SpellDialog>("", parameters, options);
     }
 
     protected override async Task OnInitializedAsync()

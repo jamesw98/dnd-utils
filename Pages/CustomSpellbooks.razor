@@ -6,6 +6,7 @@
 @inject SearchService SearchService
 @inject ISnackbar Snackbar
 @inject ILocalStorageService Storage
+@inject NavigationManager NavigationManager
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
@@ -35,8 +36,8 @@
 
 @if (_classes != null)
 {
-    var checkIcon = _allowSpellsFromOtherLists ? @Icons.Material.Filled.Check : @Icons.Material.Filled.Close; 
-    
+    var checkIcon = _allowSpellsFromOtherLists ? @Icons.Material.Filled.Check : @Icons.Material.Filled.Close;
+
     <MudContainer MaxWidth="MaxWidth.Large">
         <MudItem xs="12" sm="12">
             <MudPaper Class="pa-4">
@@ -87,10 +88,26 @@
                                     <MudTable Items="@_book.SpellsForLevel[key]" RowsPerPage="8" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
                                         <HeaderContent>
                                             <MudTh>Name</MudTh>
+                                            <MudTh Style="width: 10%">View</MudTh>
+                                            <MudTh Style="width: 10%">Remove</MudTh>
                                         </HeaderContent>
                                         <RowTemplate>
                                             <MudTd>
                                                 @context.Name
+                                            </MudTd>
+                                            <MudTd>
+                                                <MudIconButton
+                                                    Icon="@Icons.Material.Filled.RemoveRedEye"
+                                                    Color="Color.Primary"
+                                                    Variant="Variant.Filled"
+                                                    OnClick="() => { NavigateToSpell(context.SpellId); }"/>
+                                            </MudTd>
+                                            <MudTd>
+                                                <MudIconButton
+                                                    Icon="@Icons.Material.Filled.Close"
+                                                    Color="Color.Error"
+                                                    Variant="Variant.Filled"
+                                                    OnClick="() => { _book.SpellsForLevel[key].Remove(context); }"/>
                                             </MudTd>
                                         </RowTemplate>
                                     </MudTable>
@@ -125,9 +142,9 @@
         {
             var allSlots = await SearchService.GetSpellSlotsForClass(_className);
             _spellSlots = allSlots[_characterLevel];
-            
+
             await LoadSpells(_spellSlots.Keys.Max());
-            
+
             _book ??= new Spellbook();
             _book.Class = _className;
             _book.SlotsForLevel = _spellSlots;
@@ -154,7 +171,7 @@
         _allowSpellsFromOtherLists = !_allowSpellsFromOtherLists;
         await LoadSpells(_characterLevel);
     }
-    
+
     private async Task LevelChanged(string levelText)
     {
         if (int.TryParse(levelText, out var parsedInt))
@@ -168,7 +185,7 @@
         var allSpells = await SearchService.GetAllSpells();
 
         _possibleSpellsForCharacter = allSpells.Where(x => x.Level <= maxLevel).ToList();
-        
+
         if (!_allowSpellsFromOtherLists)
             _possibleSpellsForCharacter = _possibleSpellsForCharacter
                 .Where(x => x.InLists.Contains(_className))
@@ -182,9 +199,9 @@
             if (!_savedCharacterNames.Contains(_characterName))
             {
                 _savedCharacterNames.Add(_characterName);
-                await Storage.SetItemAsync("savedcharacters", _savedCharacterNames);    
+                await Storage.SetItemAsync("savedcharacters", _savedCharacterNames);
             }
-            
+
             _book.Name = _characterName;
             _book.Class = _className;
             _book.Level = _characterLevel;
@@ -201,6 +218,11 @@
     public void Refresh()
     {
         StateHasChanged();
+    }
+
+    private void NavigateToSpell(int spellId)
+    {
+        NavigationManager.NavigateTo($"/spell/{spellId}");
     }
 
     protected override async Task OnInitializedAsync()
@@ -220,7 +242,6 @@
         }
         catch (Exception e)
         {
-    // have it catch more specific exceptions later
             Snackbar.Add("An error occured collecting data, please refresh!");
         }
     }

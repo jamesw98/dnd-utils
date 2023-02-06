@@ -1,0 +1,61 @@
+﻿@using dnd_utils.Models
+@using dnd_utils.Services
+@using dnd_utils.Exceptions
+@using dnd_utils.Pages
+
+@inject SearchService SearchService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudItem xs="12" sm="12">
+        <MudPaper Class="pa-4">
+            <div class="d-flex">
+                <MudAutocomplete T="Spell" Label="Spells" @bind-Value="_spell" SearchFunc="@Search"/>
+                <MudSpacer/>
+                <MudIconButton Variant="Variant.Filled" 
+                               Icon="@Icons.Material.Filled.Add" 
+                               Color="@Color.Primary" 
+                               Edge="Edge.Start" 
+                               OnClick="AddSpell"/>
+            </div>
+        </MudPaper>
+    </MudItem>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public Action ParentMethod { get; set; }
+    
+    [Parameter]
+    public List<Spell> Spells { get; set; }
+    
+    [Parameter]
+    public Dictionary<int, List<Spell>> SpellsPerLevel { get; set; }
+    
+    [Parameter]
+    public EventCallback<Dictionary<int, List<Spell>>> SpellsPerLevelChanged { get; set; }
+
+    private Spell? _spell;
+    private string? _spellName;
+
+    private async Task<IEnumerable<Spell>> Search(string query)
+    {
+        if (string.IsNullOrEmpty(query))
+            return Array.Empty<Spell>();
+
+        var spells = Spells
+            .Where(x => x.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase));
+        
+        return spells;
+    }
+
+    private async Task AddSpell()
+    {
+        if (_spell != null)
+        {
+            SpellsPerLevel[_spell.Level].Add(_spell);
+            await SpellsPerLevelChanged.InvokeAsync(SpellsPerLevel);
+            ParentMethod.Invoke();
+        }
+    }
+}

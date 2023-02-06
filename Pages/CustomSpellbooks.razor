@@ -1,0 +1,228 @@
+﻿@page "/spellbook"
+@using dnd_utils.Services
+@using dnd_utils.Models
+@using Blazored.LocalStorage
+
+@inject SearchService SearchService
+@inject ISnackbar Snackbar
+@inject ILocalStorageService Storage
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2">
+        D&D Spell Book Builder
+    </MudText>
+</MudContainer>
+
+@if (_savedBooks.Any())
+{
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudText Typo="Typo.h4">Load Saved Character</MudText>
+        <MudItem xs="12" sm="12">
+            <MudPaper Class="pa-4">
+                <div class="d-flex">
+                    <MudSelect T="Spellbook" @bind-Value="_book" Label="Spellbook" SelectedValuesChanged="async () => { await LoadBook(); }" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var book in _savedBooks)
+                        {
+                            <MudSelectItem T="Spellbook" Value="@book"/>
+                        }
+                    </MudSelect>
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudContainer>
+    <br/>
+}
+
+@if (_classes != null)
+{
+    var checkIcon = _allowSpellsFromOtherLists ? @Icons.Material.Filled.Check : @Icons.Material.Filled.Close; 
+    
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudItem xs="12" sm="12">
+            <MudPaper Class="pa-4">
+                <div class="d-flex">
+                    <MudTextField @bind-Value="_characterName" Label="Character Name" Variant="Variant.Text"/>
+                    <MudSpacer/>
+                    <MudSelect T="string" @bind-Value="_className" SelectedValuesChanged="async () => { await GetSpellSlots(); }" Label="Class" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var name in _classes)
+                        {
+                            <MudSelectItem T="string" Value="@name"/>
+                        }
+                    </MudSelect>
+                    <MudSpacer/>
+                    <MudNumericField @bind-Value="_characterLevel" TextChanged="async (x) => { await LevelChanged(x); }" Label="Character Level" Variant="Variant.Text" Min="1" Max="20"/>
+                    <MudSpacer/>
+                    <MudButton EndIcon="@checkIcon" OnClick="ToggleChanged">Allow all spell lists</MudButton>
+                    <MudSpacer/>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save" OnClick="SaveBook">Save Spellbook</MudButton>
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudContainer>
+}
+@if (_book != null && _spellSlots != null)
+{
+    <br/>
+    <LimitedSpellSearchBar ParentMethod="@Refresh" SpellsPerLevel="_book.SpellsForLevel" Spells="_possibleSpellsForCharacter"/>
+    <br/>
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudItem xs="12" sm="12">
+            <MudPaper Class="pa-4">
+                <MudExpansionPanels MultiExpansion="true">
+                    @foreach (var key in _spellSlots.Keys)
+                    {
+                        <MudExpansionPanel DisableBorders="true">
+                            <TitleContent>
+                                <div class="d-flex">
+                                    <MudText Class="mt-1">Level @key</MudText>
+                                    @if (_spellSlots[key] != 0)
+                                    {
+                                        <MudText Class="d-flex ml-auto">Slots: @_spellSlots[key]</MudText>
+                                    }
+                                </div>
+                            </TitleContent>
+                            <ChildContent>
+                                @if (_book.SpellsForLevel[key].Any())
+                                {
+                                    <MudTable Items="@_book.SpellsForLevel[key]" RowsPerPage="8" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                                        <HeaderContent>
+                                            <MudTh>Name</MudTh>
+                                        </HeaderContent>
+                                        <RowTemplate>
+                                            <MudTd>
+                                                @context.Name
+                                            </MudTd>
+                                        </RowTemplate>
+                                    </MudTable>
+                                }
+                            </ChildContent>
+                        </MudExpansionPanel>
+                    }
+                </MudExpansionPanels>
+            </MudPaper>
+        </MudItem>
+    </MudContainer>
+}
+
+@code {
+    private string? _characterName;
+    private string? _className;
+
+    private int _characterLevel = 1;
+    private Dictionary<int, int>? _spellSlots;
+    private Spellbook? _book;
+
+    private List<Spell> _possibleSpellsForCharacter = new();
+    private List<string> _savedCharacterNames = new();
+    private List<string>? _classes;
+    private List<Spellbook> _savedBooks = new();
+
+    private bool _allowSpellsFromOtherLists = false;
+
+    private async Task GetSpellSlots()
+    {
+        if (_className != null)
+        {
+            var allSlots = await SearchService.GetSpellSlotsForClass(_className);
+            _spellSlots = allSlots[_characterLevel];
+            
+            await LoadSpells(_spellSlots.Keys.Max());
+            
+            _book ??= new Spellbook();
+            _book.Class = _className;
+            _book.SlotsForLevel = _spellSlots;
+
+            foreach (var slot in _spellSlots.Keys.Where(slot => !_book.SpellsForLevel.ContainsKey(slot)))
+                _book.SpellsForLevel[slot] = new List<Spell>();
+        }
+    }
+
+    private async Task LoadBook()
+    {
+        if (_book != null)
+        {
+            _className = _book.Class;
+            _characterLevel = _book.Level;
+            _characterName = _book.Name;
+        }
+
+        await GetSpellSlots();
+    }
+
+    private async Task ToggleChanged()
+    {
+        _allowSpellsFromOtherLists = !_allowSpellsFromOtherLists;
+        await LoadSpells(_characterLevel);
+    }
+    
+    private async Task LevelChanged(string levelText)
+    {
+        if (int.TryParse(levelText, out var parsedInt))
+            _characterLevel = parsedInt;
+
+        await GetSpellSlots();
+    }
+
+    private async Task LoadSpells(int maxLevel)
+    {
+        var allSpells = await SearchService.GetAllSpells();
+
+        _possibleSpellsForCharacter = allSpells.Where(x => x.Level <= maxLevel).ToList();
+        
+        if (!_allowSpellsFromOtherLists)
+            _possibleSpellsForCharacter = _possibleSpellsForCharacter
+                .Where(x => x.InLists.Contains(_className))
+                .ToList();
+    }
+
+    private async Task SaveBook()
+    {
+        if (_characterName != null && _className != null)
+        {
+            if (!_savedCharacterNames.Contains(_characterName))
+            {
+                _savedCharacterNames.Add(_characterName);
+                await Storage.SetItemAsync("savedcharacters", _savedCharacterNames);    
+            }
+            
+            _book.Name = _characterName;
+            _book.Class = _className;
+            _book.Level = _characterLevel;
+            await Storage.SetItemAsync($"{_characterName}_book", _book);
+
+            Snackbar.Add($"Spellbook \"{_characterName}\" has been saved", Severity.Success);
+
+            return;
+        }
+
+        Snackbar.Add("Could not save, make sure you have entered a name, class, and at least one spell", Severity.Warning);
+    }
+
+    public void Refresh()
+    {
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _classes = await SearchService.GetClassList();
+
+            if (await Storage.ContainKeyAsync("savedcharacters"))
+                _savedCharacterNames = await Storage.GetItemAsync<List<string>>("savedcharacters");
+
+            if (_savedCharacterNames.Any())
+            {
+                foreach (var name in _savedCharacterNames)
+                    _savedBooks.Add(await Storage.GetItemAsync<Spellbook>($"{name}_book"));
+            }
+        }
+        catch (Exception e)
+        {
+    // have it catch more specific exceptions later
+            Snackbar.Add("An error occured collecting data, please refresh!");
+        }
+    }
+
+}

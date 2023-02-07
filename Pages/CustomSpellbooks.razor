@@ -4,8 +4,10 @@
 @using Blazored.LocalStorage
 
 @inject SearchService SearchService
+@inject SpellService SpellService
 @inject ISnackbar Snackbar
 @inject ILocalStorageService Storage
+@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
@@ -35,8 +37,8 @@
 
 @if (_classes != null)
 {
-    var checkIcon = _allowSpellsFromOtherLists ? @Icons.Material.Filled.Check : @Icons.Material.Filled.Close; 
-    
+    var checkIcon = _allowSpellsFromOtherLists ? Icons.Material.Filled.Check : Icons.Material.Filled.Close;
+
     <MudContainer MaxWidth="MaxWidth.Large">
         <MudItem xs="12" sm="12">
             <MudPaper Class="pa-4">
@@ -52,18 +54,36 @@
                     <MudSpacer/>
                     <MudNumericField @bind-Value="_characterLevel" TextChanged="async (x) => { await LevelChanged(x); }" Label="Character Level" Variant="Variant.Text" Min="1" Max="20"/>
                     <MudSpacer/>
-                    <MudButton EndIcon="@checkIcon" OnClick="ToggleChanged">Allow all spell lists</MudButton>
+                    <MudNumericField @bind-Value="_characterStatValue" TextChanged="async (x) => { await StatChanged(x); }" Label="Casting Stat Value" Variant="Variant.Text" Min="1" Max="30"/>
+                    <MudSpacer/>
+                    <MudButton EndIcon="@checkIcon" OnClick="ToggleChanged">All spell lists</MudButton>
                     <MudSpacer/>
                     <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save" OnClick="SaveBook">Save Spellbook</MudButton>
                 </div>
             </MudPaper>
         </MudItem>
     </MudContainer>
-}
-@if (_book != null && _spellSlots != null)
+} 
+@if (_book != null && _spellSlots != null && _spellsKnown != null)
 {
+    var cantripSubtract = _book.SpellsForLevel.ContainsKey(0) ? _book.SpellsForLevel[0].Count : 0;
+    var spellCount = _book.SpellsForLevel.Values.Sum(list => list.Count) - cantripSubtract;
+    
     <br/>
     <LimitedSpellSearchBar ParentMethod="@Refresh" SpellsPerLevel="_book.SpellsForLevel" Spells="_possibleSpellsForCharacter"/>
+    <br/>
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudText Typo="Typo.h4">Max Spells Known: @_spellsKnown</MudText>
+        <div class="d-flex">
+            <MudText Typo="Typo.h5">Spells Known: @spellCount</MudText>
+            @if (spellCount > _spellsKnown)
+            {
+                <MudTooltip Text="You've added more than your max! This is okay, since subclasses have expanded spell lists, but be careful!">
+                    <MudIcon Icon="@Icons.Material.Filled.WarningAmber" Color="Color.Warning"/>
+                </MudTooltip>
+            }
+        </div>
+    </MudContainer>
     <br/>
     <MudContainer MaxWidth="MaxWidth.Large">
         <MudItem xs="12" sm="12">
@@ -71,13 +91,16 @@
                 <MudExpansionPanels MultiExpansion="true">
                     @foreach (var key in _spellSlots.Keys)
                     {
+                        var levelText = key == 0 ? "Cantrip" : $"Level {key}";
+                        var slotText = key == 0 ? "Known: " : "Slots: ";
+                        
                         <MudExpansionPanel DisableBorders="true">
                             <TitleContent>
                                 <div class="d-flex">
-                                    <MudText Class="mt-1">Level @key</MudText>
+                                    <MudText Class="mt-1">@levelText</MudText>
                                     @if (_spellSlots[key] != 0)
                                     {
-                                        <MudText Class="d-flex ml-auto">Slots: @_spellSlots[key]</MudText>
+                                        <MudText Class="d-flex ml-auto">@slotText @_spellSlots[key]</MudText>
                                     }
                                 </div>
                             </TitleContent>
@@ -87,10 +110,26 @@
                                     <MudTable Items="@_book.SpellsForLevel[key]" RowsPerPage="8" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
                                         <HeaderContent>
                                             <MudTh>Name</MudTh>
+                                            <MudTh Style="width: 10%">View</MudTh>
+                                            <MudTh Style="width: 10%">Remove</MudTh>
                                         </HeaderContent>
                                         <RowTemplate>
                                             <MudTd>
                                                 @context.Name
+                                            </MudTd>
+                                            <MudTd>
+                                                <MudIconButton
+                                                    Icon="@Icons.Material.Filled.RemoveRedEye"
+                                                    Color="Color.Primary"
+                                                    Variant="Variant.Filled"
+                                                    OnClick="async () => { await ViewSpell(context.Name, context.SpellId); }"/>
+                                            </MudTd>
+                                            <MudTd>
+                                                <MudIconButton
+                                                    Icon="@Icons.Material.Filled.Close"
+                                                    Color="Color.Error"
+                                                    Variant="Variant.Filled"
+                                                    OnClick="() => { _book.SpellsForLevel[key].Remove(context); }"/>
                                             </MudTd>
                                         </RowTemplate>
                                     </MudTable>
@@ -109,6 +148,8 @@
     private string? _className;
 
     private int _characterLevel = 1;
+    private int? _characterStatValue;
+    private int? _spellsKnown;
     private Dictionary<int, int>? _spellSlots;
     private Spellbook? _book;
 
@@ -125,9 +166,9 @@
         {
             var allSlots = await SearchService.GetSpellSlotsForClass(_className);
             _spellSlots = allSlots[_characterLevel];
-            
+
             await LoadSpells(_spellSlots.Keys.Max());
-            
+
             _book ??= new Spellbook();
             _book.Class = _className;
             _book.SlotsForLevel = _spellSlots;
@@ -144,6 +185,7 @@
             _className = _book.Class;
             _characterLevel = _book.Level;
             _characterName = _book.Name;
+            _characterStatValue = _book.CastingStatValue;
         }
 
         await GetSpellSlots();
@@ -154,7 +196,23 @@
         _allowSpellsFromOtherLists = !_allowSpellsFromOtherLists;
         await LoadSpells(_characterLevel);
     }
-    
+
+    private async Task StatChanged(string statText)
+    {
+        if (_className == null)
+        {
+            Snackbar.Add("Please select a class first", Severity.Error);
+            return;
+        }
+            
+        if (int.TryParse(statText, out var parsedInt))
+            _characterStatValue = parsedInt;
+
+        _spellsKnown = SpellService.GetNumberOfKnownSpells(_className, _characterLevel, _characterStatValue ?? 0);
+
+        await GetSpellSlots();
+    }
+
     private async Task LevelChanged(string levelText)
     {
         if (int.TryParse(levelText, out var parsedInt))
@@ -168,7 +226,7 @@
         var allSpells = await SearchService.GetAllSpells();
 
         _possibleSpellsForCharacter = allSpells.Where(x => x.Level <= maxLevel).ToList();
-        
+
         if (!_allowSpellsFromOtherLists)
             _possibleSpellsForCharacter = _possibleSpellsForCharacter
                 .Where(x => x.InLists.Contains(_className))
@@ -177,17 +235,18 @@
 
     private async Task SaveBook()
     {
-        if (_characterName != null && _className != null)
+        if (_characterName != null && _className != null && _characterStatValue != null)
         {
             if (!_savedCharacterNames.Contains(_characterName))
             {
                 _savedCharacterNames.Add(_characterName);
-                await Storage.SetItemAsync("savedcharacters", _savedCharacterNames);    
+                await Storage.SetItemAsync("savedcharacters", _savedCharacterNames);
             }
-            
+
             _book.Name = _characterName;
             _book.Class = _className;
             _book.Level = _characterLevel;
+            _book.CastingStatValue = _characterStatValue;
             await Storage.SetItemAsync($"{_characterName}_book", _book);
 
             Snackbar.Add($"Spellbook \"{_characterName}\" has been saved", Severity.Success);
@@ -201,6 +260,15 @@
     public void Refresh()
     {
         StateHasChanged();
+    }
+
+    private async Task ViewSpell(string name, int spellId)
+    {
+        var spell = await SearchService.GetSpell(name);
+        var parameters = new DialogParameters { { "Spell", spell }, { "SpellId", spellId } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
+
+        await DialogService.ShowAsync<SpellDialog>("", parameters, options);
     }
 
     protected override async Task OnInitializedAsync()
@@ -220,7 +288,6 @@
         }
         catch (Exception e)
         {
-    // have it catch more specific exceptions later
             Snackbar.Add("An error occured collecting data, please refresh!");
         }
     }

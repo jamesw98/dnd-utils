@@ -54,7 +54,7 @@
                     <MudSpacer/>
                     <MudNumericField @bind-Value="_characterLevel" TextChanged="async (x) => { await LevelChanged(x); }" Label="Character Level" Variant="Variant.Text" Min="1" Max="20"/>
                     <MudSpacer/>
-                    <MudNumericField @bind-Value="_characterStatValue" TextChanged="async (x) => { await StatChanged(x); }" Label="Casting Stat Value" Variant="Variant.Text" Min="1" Max="30"/>
+                    <MudNumericField @bind-Value="_characterStatValue" TextChanged="async (x) => { await StatChanged(x); }" Label="Casting Ability Score" Variant="Variant.Text" Min="1" Max="30"/>
                     <MudSpacer/>
                     <MudButton EndIcon="@checkIcon" OnClick="ToggleChanged">All spell lists</MudButton>
                     <MudSpacer/>

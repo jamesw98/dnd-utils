@@ -16,5 +16,6 @@ builder.Services.AddScoped<MonsterService>();
 builder.Services.AddScoped<DiceService>();
 builder.Services.AddScoped<AttackService>();
 builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<SpellService>();
 
 await builder.Build().RunAsync();

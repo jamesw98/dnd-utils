@@ -4,6 +4,7 @@
 @using Blazored.LocalStorage
 
 @inject SearchService SearchService
+@inject SpellService SpellService
 @inject ISnackbar Snackbar
 @inject ILocalStorageService Storage
 @inject IDialogService DialogService
@@ -53,18 +54,25 @@
                     <MudSpacer/>
                     <MudNumericField @bind-Value="_characterLevel" TextChanged="async (x) => { await LevelChanged(x); }" Label="Character Level" Variant="Variant.Text" Min="1" Max="20"/>
                     <MudSpacer/>
-                    <MudButton EndIcon="@checkIcon" OnClick="ToggleChanged">Allow all spell lists</MudButton>
+                    <MudNumericField @bind-Value="_characterStatValue" TextChanged="async (x) => { await StatChanged(x); }" Label="Casting Stat Value" Variant="Variant.Text" Min="1" Max="30"/>
+                    <MudSpacer/>
+                    <MudButton EndIcon="@checkIcon" OnClick="ToggleChanged">All spell lists</MudButton>
                     <MudSpacer/>
                     <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save" OnClick="SaveBook">Save Spellbook</MudButton>
                 </div>
             </MudPaper>
         </MudItem>
     </MudContainer>
-}
-@if (_book != null && _spellSlots != null)
+} 
+@if (_book != null && _spellSlots != null && _spellsKnown != null)
 {
     <br/>
     <LimitedSpellSearchBar ParentMethod="@Refresh" SpellsPerLevel="_book.SpellsForLevel" Spells="_possibleSpellsForCharacter"/>
+    <br/>
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudText Typo="Typo.h4">Max Spells Known: @_spellsKnown</MudText>
+        <MudText Typo="Typo.h6">Spells Known: @_book.SpellsForLevel.Values.Sum(list => list.Count)</MudText>
+    </MudContainer>
     <br/>
     <MudContainer MaxWidth="MaxWidth.Large">
         <MudItem xs="12" sm="12">
@@ -126,6 +134,8 @@
     private string? _className;
 
     private int _characterLevel = 1;
+    private int? _characterStatValue;
+    private int? _spellsKnown;
     private Dictionary<int, int>? _spellSlots;
     private Spellbook? _book;
 
@@ -161,6 +171,7 @@
             _className = _book.Class;
             _characterLevel = _book.Level;
             _characterName = _book.Name;
+            _characterStatValue = _book.CastingStatValue;
         }
 
         await GetSpellSlots();
@@ -170,6 +181,22 @@
     {
         _allowSpellsFromOtherLists = !_allowSpellsFromOtherLists;
         await LoadSpells(_characterLevel);
+    }
+
+    private async Task StatChanged(string statText)
+    {
+        if (_className == null)
+        {
+            Snackbar.Add("Please select a class first", Severity.Error);
+            return;
+        }
+            
+        if (int.TryParse(statText, out var parsedInt))
+            _characterStatValue = parsedInt;
+
+        _spellsKnown = SpellService.GetNumberOfKnownSpells(_className, _characterLevel, _characterStatValue ?? 0);
+
+        await GetSpellSlots();
     }
 
     private async Task LevelChanged(string levelText)
@@ -194,7 +221,7 @@
 
     private async Task SaveBook()
     {
-        if (_characterName != null && _className != null)
+        if (_characterName != null && _className != null && _characterStatValue != null)
         {
             if (!_savedCharacterNames.Contains(_characterName))
             {
@@ -205,6 +232,7 @@
             _book.Name = _characterName;
             _book.Class = _className;
             _book.Level = _characterLevel;
+            _book.CastingStatValue = _characterStatValue;
             await Storage.SetItemAsync($"{_characterName}_book", _book);
 
             Snackbar.Add($"Spellbook \"{_characterName}\" has been saved", Severity.Success);

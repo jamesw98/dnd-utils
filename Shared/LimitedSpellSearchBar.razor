@@ -53,6 +53,12 @@
     {
         if (_spell != null)
         {
+            if (SpellsPerLevel[_spell.Level].Select(x => x.Name).Contains(_spell.Name))
+            {
+                Snackbar.Add("Cannot add duplicate spells", Severity.Warning);
+                return;
+            }
+            
             SpellsPerLevel[_spell.Level].Add(_spell);
             await SpellsPerLevelChanged.InvokeAsync(SpellsPerLevel);
             ParentMethod.Invoke();

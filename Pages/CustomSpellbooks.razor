@@ -66,14 +66,17 @@
 } 
 @if (_book != null && _spellSlots != null && _spellsKnown != null)
 {
+    var cantripSubtract = _book.SpellsForLevel.ContainsKey(0) ? _book.SpellsForLevel[0].Count : 0;
+    var spellCount = _book.SpellsForLevel.Values.Sum(list => list.Count) - cantripSubtract;
+    
     <br/>
     <LimitedSpellSearchBar ParentMethod="@Refresh" SpellsPerLevel="_book.SpellsForLevel" Spells="_possibleSpellsForCharacter"/>
     <br/>
     <MudContainer MaxWidth="MaxWidth.Large">
         <MudText Typo="Typo.h4">Max Spells Known: @_spellsKnown</MudText>
         <div class="d-flex">
-            <MudText Typo="Typo.h5">Spells Known: @_book.SpellsForLevel.Values.Sum(list => list.Count)</MudText>
-            @if (_book.SpellsForLevel.Values.Sum(list => list.Count) > _spellsKnown)
+            <MudText Typo="Typo.h5">Spells Known: @spellCount</MudText>
+            @if (spellCount > _spellsKnown)
             {
                 <MudTooltip Text="You've added more than your max! This is okay, since subclasses have expanded spell lists, but be careful!">
                     <MudIcon Icon="@Icons.Material.Filled.WarningAmber" Color="Color.Warning"/>
@@ -88,13 +91,16 @@
                 <MudExpansionPanels MultiExpansion="true">
                     @foreach (var key in _spellSlots.Keys)
                     {
+                        var levelText = key == 0 ? "Cantrip" : $"Level {key}";
+                        var slotText = key == 0 ? "Known: " : "Slots: ";
+                        
                         <MudExpansionPanel DisableBorders="true">
                             <TitleContent>
                                 <div class="d-flex">
-                                    <MudText Class="mt-1">Level @key</MudText>
+                                    <MudText Class="mt-1">@levelText</MudText>
                                     @if (_spellSlots[key] != 0)
                                     {
-                                        <MudText Class="d-flex ml-auto">Slots: @_spellSlots[key]</MudText>
+                                        <MudText Class="d-flex ml-auto">@slotText @_spellSlots[key]</MudText>
                                     }
                                 </div>
                             </TitleContent>

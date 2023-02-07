@@ -71,7 +71,15 @@
     <br/>
     <MudContainer MaxWidth="MaxWidth.Large">
         <MudText Typo="Typo.h4">Max Spells Known: @_spellsKnown</MudText>
-        <MudText Typo="Typo.h6">Spells Known: @_book.SpellsForLevel.Values.Sum(list => list.Count)</MudText>
+        <div class="d-flex">
+            <MudText Typo="Typo.h5">Spells Known: @_book.SpellsForLevel.Values.Sum(list => list.Count)</MudText>
+            @if (_book.SpellsForLevel.Values.Sum(list => list.Count) > _spellsKnown)
+            {
+                <MudTooltip Text="You've added more than your max! This is okay, since subclasses have expanded spell lists, but be careful!">
+                    <MudIcon Icon="@Icons.Material.Filled.WarningAmber" Color="Color.Warning"/>
+                </MudTooltip>
+            }
+        </div>
     </MudContainer>
     <br/>
     <MudContainer MaxWidth="MaxWidth.Large">

@@ -2,12 +2,15 @@
 @using dnd_utils.Services
 @using dnd_utils.Models
 @using Blazored.LocalStorage
+@using BlazorDownloadFile
+@using System.Text.Json
 
 @inject SearchService SearchService
 @inject SpellService SpellService
 @inject ISnackbar Snackbar
 @inject ILocalStorageService Storage
 @inject IDialogService DialogService
+@inject IBlazorDownloadFileService DownloadService
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
@@ -22,12 +25,25 @@
         <MudItem xs="12" sm="12">
             <MudPaper Class="pa-4">
                 <div class="d-flex">
-                    <MudSelect T="Spellbook" @bind-Value="_book" Label="Spellbook" SelectedValuesChanged="async () => { await LoadBook(); }" AnchorOrigin="Origin.BottomCenter">
+                    <MudSelect
+                        T="Spellbook"
+                        @bind-Value="_book"
+                        Label="Spellbook"
+                        SelectedValuesChanged="async () => { await LoadBook(); }"
+                        AnchorOrigin="Origin.BottomCenter">
                         @foreach (var book in _savedBooks)
                         {
                             <MudSelectItem T="Spellbook" Value="@book"/>
                         }
                     </MudSelect>
+                    <MudSpacer/>
+                    <MudButton
+                        @onclick="DownloadCurrentBook"
+                        Variant="Variant.Filled"
+                        Color="Color.Primary"
+                        Disabled="@(_book == null)">
+                        Download
+                    </MudButton>
                 </div>
             </MudPaper>
         </MudItem>
@@ -43,32 +59,56 @@
         <MudItem xs="12" sm="12">
             <MudPaper Class="pa-4">
                 <div class="d-flex">
-                    <MudTextField @bind-Value="_characterName" Label="Character Name" Variant="Variant.Text"/>
+                    <MudTextField
+                        @bind-Value="_characterName"
+                        Label="Character Name"
+                        Variant="Variant.Text"/>
                     <MudSpacer/>
-                    <MudSelect T="string" @bind-Value="_className" SelectedValuesChanged="async () => { await GetSpellSlots(); }" Label="Class" AnchorOrigin="Origin.BottomCenter">
+                    <MudSelect
+                        T="string"
+                        @bind-Value="_className"
+                        SelectedValuesChanged="async () => { await GetSpellSlots(); }"
+                        Label="Class"
+                        AnchorOrigin="Origin.BottomCenter">
                         @foreach (var name in _classes)
                         {
                             <MudSelectItem T="string" Value="@name"/>
                         }
                     </MudSelect>
                     <MudSpacer/>
-                    <MudNumericField @bind-Value="_characterLevel" TextChanged="async (x) => { await LevelChanged(x); }" Label="Character Level" Variant="Variant.Text" Min="1" Max="20"/>
+                    <MudNumericField
+                        @bind-Value="_characterLevel"
+                        TextChanged="async (x) => { await LevelChanged(x); }"
+                        Label="Character Level"
+                        Variant="Variant.Text"
+                        Min="1" Max="20"/>
                     <MudSpacer/>
-                    <MudNumericField @bind-Value="_characterStatValue" TextChanged="async (x) => { await StatChanged(x); }" Label="Casting Ability Score" Variant="Variant.Text" Min="1" Max="30"/>
+                    <MudNumericField
+                        @bind-Value="_characterStatValue"
+                        TextChanged="async (x) => { await StatChanged(x); }"
+                        Label="Casting Stat Value"
+                        Variant="Variant.Text"
+                        Min="1" Max="30"/>
                     <MudSpacer/>
                     <MudButton EndIcon="@checkIcon" OnClick="ToggleChanged">All spell lists</MudButton>
                     <MudSpacer/>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save" OnClick="SaveBook">Save Spellbook</MudButton>
+                    <MudButton
+                        Variant="Variant.Filled"
+                        Color="Color.Success"
+                        StartIcon="@Icons.Material.Filled.Save"
+                        OnClick="SaveBook">
+                        Save Spellbook
+                    </MudButton>
                 </div>
             </MudPaper>
         </MudItem>
     </MudContainer>
-} 
+}
 @if (_book != null && _spellSlots != null && _spellsKnown != null)
 {
     var cantripSubtract = _book.SpellsForLevel.ContainsKey(0) ? _book.SpellsForLevel[0].Count : 0;
     var spellCount = _book.SpellsForLevel.Values.Sum(list => list.Count) - cantripSubtract;
-    
+
     <br/>
     <LimitedSpellSearchBar ParentMethod="@Refresh" SpellsPerLevel="_book.SpellsForLevel" Spells="_possibleSpellsForCharacter"/>
     <br/>
@@ -93,7 +133,7 @@
                     {
                         var levelText = key == 0 ? "Cantrip" : $"Level {key}";
                         var slotText = key == 0 ? "Known: " : "Slots: ";
-                        
+
                         <MudExpansionPanel DisableBorders="true">
                             <TitleContent>
                                 <div class="d-flex">
@@ -204,7 +244,7 @@
             Snackbar.Add("Please select a class first", Severity.Error);
             return;
         }
-            
+
         if (int.TryParse(statText, out var parsedInt))
             _characterStatValue = parsedInt;
 
@@ -269,6 +309,31 @@
         var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
 
         await DialogService.ShowAsync<SpellDialog>("", parameters, options);
+    }
+
+    private async Task DownloadCurrentBook()
+    {
+        if (_book == null || _characterName == null)
+        {
+            Snackbar.Add("Please make sure all fields are entered", Severity.Warning);
+            return;
+        }
+
+        await PopulateSpells();
+        var text = JsonSerializer.Serialize(_book);
+        await DownloadService.DownloadFileFromText($"{_characterName.ToLower().Replace(" ", "")}_book.json", text, System.Text.Encoding.UTF8, "application/octet-stream");
+    }
+
+    private async Task PopulateSpells()
+    {
+        if (_book == null)
+        {
+            Snackbar.Add("An error occured, book is null", Severity.Warning);
+            return;
+        }
+
+        foreach (Spell? spell in _book.SpellsForLevel.Keys.SelectMany(level => _book.SpellsForLevel[level]))
+            spell.PageContent = (await SearchService.GetSpell(spell.Name)).PageContent;
     }
 
     protected override async Task OnInitializedAsync()

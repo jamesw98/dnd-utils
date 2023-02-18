@@ -1,4 +1,5 @@
 ﻿using dnd_utils.Exceptions;
+using dnd_utils.Models;
 
 namespace dnd_utils.Services;
 
@@ -28,7 +29,17 @@ public class SpellService
             _ => throw new NotFoundException($"Could not find class {className}")
         };
     }
-    
+
+    /// <summary>
+    /// returns a book with fully filled out spells 
+    /// </summary>
+    /// <param name="book">the spellbook without fully filled out spells</param>
+    /// <returns></returns>
+    // public Spellbook GetSpellbookToDownloadJson(Spellbook book)
+    // {
+    //     
+    // }
+    //
     private int GetFullCaster(int level, int castingStatValue)
     {
         return level + GetModifier(castingStatValue);

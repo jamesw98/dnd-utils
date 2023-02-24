@@ -120,7 +120,7 @@
     
     private MudTextField<int> _fixedDamage;
 
-    private MudTextField<string> _attackName;
+    private MudTextField<string>? _attackName;
 
     private async Task InvokeAttacks()
     {
@@ -150,7 +150,7 @@
         try
         {
             var attacks = AttackService.CalculateAttackResults(
-                _attackName.Value,
+                _attackName?.Value ?? "",
                 _attackNum.Value,
                 _toHitMod.Value,
                 CombatManagerLayout ? 0 : _ac.Value,

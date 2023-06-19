@@ -23,6 +23,7 @@ public class MonsterService
             
             result.Add(new Monster
             {
+                Name = "temp",
                 Initiative = init,
                 HitPoints = hp,
                 MaxHitPoints = hp,

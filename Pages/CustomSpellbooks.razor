@@ -41,6 +41,14 @@
                         @onclick="DownloadCurrentBook"
                         Variant="Variant.Filled"
                         Color="Color.Primary"
+                        >
+                        Import
+                    </MudButton>
+                    <MudSpacer/>
+                    <MudButton
+                        @onclick="DownloadCurrentBook"
+                        Variant="Variant.Filled"
+                        Color="Color.Primary"
                         Disabled="@(_book == null)">
                         Download
                     </MudButton>

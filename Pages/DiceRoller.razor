@@ -1,0 +1,62 @@
+﻿@page "/dice"
+@using dnd_utils.Services
+@using dnd_utils.Models
+
+@inject DiceService Dice
+
+<br/>
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <MudPaper Class="pa-4">
+                <div class="d-flex">
+                    <MudTextField T="int" Label="Number of Dice" Required="true" RequiredError="Number of dice is required!" @ref="_numDice"/>
+                    <MudSpacer/>
+                    <MudTextField T="int" Label="Die Type" Required="true" RequiredError="Die type is required!" @ref="_dieType"/>
+                    <MudSpacer/>
+                    <MudTextField T="int" Label="Modifier" Required="true" @ref="_modifier"/>
+                    <MudSpacer/>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Roll">Roll</MudButton>
+                </div>
+                <br/>
+                <div class="d-flex">
+                    <MudCheckBox @bind-Checked="_modOnEvery" Color="Color.Primary">Use modifier on every die</MudCheckBox>
+                </div>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="5">
+            <MudPaper Class="pa-4">
+                <MudTable T="RollDetails" Items="_rolls" Breakpoint="Breakpoint.Md">
+                    <HeaderContent>
+                        <MudTh>Formula</MudTh>
+                        <MudTh>Result</MudTh>
+                        <MudTh>Dice</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@($"{context.Num}d{context.Die}")</MudTd>
+                        <MudTd> 
+                            <b>@context.Total</b>
+                        </MudTd>
+                        <MudTd>@context.ToSimpleString()</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+
+    private MudTextField<int> _numDice;
+    private MudTextField<int> _modifier;
+    private MudTextField<int> _dieType;
+
+    private bool _modOnEvery = false;
+
+    private List<RollDetails> _rolls = new();
+
+    private void Roll()
+    {
+        _rolls.Insert(0, Dice.RollDetailed(_numDice.Value, _dieType.Value, _modifier.Value, _modOnEvery));
+    }
+}

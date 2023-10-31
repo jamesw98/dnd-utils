@@ -5,19 +5,20 @@ namespace dnd_utils.Services;
 
 public class DiceService
 {
-    private Random _rand = new();
+    private readonly Random _rand = new();
 
     public (RollDetails, RollDetails) RollDetailsNonStandard(int num, int type, int mod, AdvantageState state, bool modOnEvery=false)
     {
         if (type != 20)
+        {
             throw new Exception("(Dis)Advantage can only be used with d20s");
+        }
 
         List<RollDetails> rolls = new (new[] { RollDetailed(num, type, mod), RollDetailed(num, type, mod) });
 
-        if (state == AdvantageState.Advantage)
-            rolls = rolls.OrderByDescending(x => x.Total).ToList();
-        else 
-            rolls = rolls.OrderBy(x => x.Total).ToList();    
+        rolls = state == AdvantageState.Advantage 
+            ? rolls.OrderByDescending(x => x.Total).ToList() 
+            : rolls.OrderBy(x => x.Total).ToList();    
         
         return (rolls[0], rolls[1]);
     }
@@ -33,7 +34,9 @@ public class DiceService
             rolls.Add(currentRoll);
         }
 
-        total += modOnEvery ? mod * num : mod;
+        total += modOnEvery 
+            ? mod * num 
+            : mod;
 
         return new RollDetails
         {
@@ -42,7 +45,8 @@ public class DiceService
             Die = type,
             Mod = mod,
             Total = total,
-            Fixed = false
+            Fixed = false,
+            ModOnEvery = modOnEvery
         };
     }
     
@@ -51,9 +55,13 @@ public class DiceService
         var result = 0;
 
         for (var i = 0; i < num; i++)
+        {
             result += _rand.Next(1, type + 1);
+        }
 
-        result += modOnEvery ? mod * num : mod;
+        result += modOnEvery 
+            ? mod * num 
+            : mod;
         return result;
     }
 }

@@ -9,10 +9,17 @@ public class RollDetails
     public int Total { get; set; }
     public bool Fixed { get; set; }
     public bool ModOnEvery { get; set; } = false;
+    public string? Formula { get; set; }
+    public int? RollNum { get; set; }
 
     public string ToSimpleString()
     {
         var result = "";
+        if (Formula != null)
+        {
+            return result;
+        }
+        
         if (Rolls == null)
         {
             return result;

@@ -3,6 +3,7 @@
 @using dnd_utils.Models
 
 @inject DiceService Dice
+@inject ISnackbar Snackbar
 
 <br/>
 <MudContainer MaxWidth="MaxWidth.Large">
@@ -10,11 +11,18 @@
         <MudItem xs="12" sm="7">
             <MudPaper Class="pa-4">
                 <div class="d-flex">
+                    <MudTextField T="string" Label="Formula" @ref="_formula"/>
+                    <MudSpacer/>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Roll">Roll</MudButton>
+                </div>
+                <br/>
+                or
+                <div class="d-flex">
                     <MudTextField T="int" Label="Number of Dice" Required="true" RequiredError="Number of dice is required!" @ref="_numDice"/>
                     <MudSpacer/>
                     <MudTextField T="int" Label="Die Type" Required="true" RequiredError="Die type is required!" @ref="_dieType"/>
                     <MudSpacer/>
-                    <MudTextField T="int" Label="Modifier" Required="true" @ref="_modifier"/>
+                    <MudTextField T="int" Label="Modifier" @ref="_modifier"/>
                     <MudSpacer/>
                     <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Roll">Roll</MudButton>
                 </div>
@@ -28,13 +36,15 @@
             <MudPaper Class="pa-4">
                 <MudTable T="RollDetails" Items="_rolls" Breakpoint="Breakpoint.Md">
                     <HeaderContent>
+                        <MudTh>Roll Group</MudTh>
                         <MudTh>Formula</MudTh>
                         <MudTh>Result</MudTh>
                         <MudTh>Dice</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd>@($"{context.Num}d{context.Die}")</MudTd>
-                        <MudTd> 
+                        <MudTh>@context.RollNum</MudTh>
+                        <MudTd>@(context.Formula ?? $"{context.Num}d{context.Die}")</MudTd>
+                        <MudTd>
                             <b>@context.Total</b>
                         </MudTd>
                         <MudTd>@context.ToSimpleString()</MudTd>
@@ -47,16 +57,34 @@
 
 @code {
 
-    private MudTextField<int> _numDice;
-    private MudTextField<int> _modifier;
-    private MudTextField<int> _dieType;
+    private MudTextField<int> _numDice = new();
+    private MudTextField<int> _modifier = new();
+    private MudTextField<int> _dieType = new();
+    private MudTextField<string?> _formula = new();
 
+    private int _rollNum = 0;
     private bool _modOnEvery = false;
-
     private List<RollDetails> _rolls = new();
 
     private void Roll()
     {
-        _rolls.Insert(0, Dice.RollDetailed(_numDice.Value, _dieType.Value, _modifier.Value, _modOnEvery));
+        try
+        {
+            if (!string.IsNullOrEmpty(_formula.Value))
+            {
+                var values = Dice.RollFromFormula(_formula.Value, _rollNum);
+                _rolls.InsertRange(0, values.Reverse());
+            }
+            else
+            {
+                _rolls.Insert(0, Dice.RollDetailed(_numDice.Value, _dieType.Value, _modifier.Value, _modOnEvery));
+            }
+            _rollNum++;
+        }
+        catch (ArgumentException ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
     }
+
 }

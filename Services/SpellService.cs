@@ -29,28 +29,36 @@ public class SpellService
             _ => throw new NotFoundException($"Could not find class {className}")
         };
     }
-
+    
     /// <summary>
-    /// returns a book with fully filled out spells 
+    /// Gets number of known spells for full casters 
     /// </summary>
-    /// <param name="book">the spellbook without fully filled out spells</param>
+    /// <param name="level">the level</param>
+    /// <param name="castingStatValue">the value of the casters casting stat (wis, int, or cha)</param>
     /// <returns></returns>
-    // public Spellbook GetSpellbookToDownloadJson(Spellbook book)
-    // {
-    //     
-    // }
-    //
-    private int GetFullCaster(int level, int castingStatValue)
+    private static int GetFullCaster(int level, int castingStatValue)
     {
         return level + GetModifier(castingStatValue);
     }
     
+    /// <summary>
+    /// Gets number of known spells for half casters 
+    /// </summary>
+    /// <param name="level">the level</param>
+    /// <param name="castingStatValue">the value of the casters casting stat (wis, int, or cha)</param>
+    /// <returns></returns>
     private int GetHalfCaster(int level, int castingStatValue)
     {
         return level / 2 + GetModifier(castingStatValue);
     }
-
-    private int GetBard(int level)
+    
+    /// <summary>
+    /// Gets known spells for bards
+    /// </summary>
+    /// <param name="level"></param>
+    /// <returns></returns>
+    /// <exception cref="IllegalStateException"></exception>
+    private static int GetBard(int level)
     {
         return level switch
         {
@@ -78,7 +86,13 @@ public class SpellService
         };
     }
 
-    private int GetRanger(int level)
+    /// <summary>
+    /// Gets known spells for rangers
+    /// </summary>
+    /// <param name="level"></param>
+    /// <returns></returns>
+    /// <exception cref="IllegalStateException"></exception>
+    private static int GetRanger(int level)
     {
         return level switch
         {
@@ -106,7 +120,13 @@ public class SpellService
         };
     }
     
-    private int GetSorcerer(int level)
+    /// <summary>
+    /// Gets known spells for sorcerers
+    /// </summary>
+    /// <param name="level"></param>
+    /// <returns></returns>
+    /// <exception cref="IllegalStateException"></exception>
+    private static int GetSorcerer(int level)
     {
         return level switch
         {
@@ -134,7 +154,13 @@ public class SpellService
         };
     }
     
-    private int GetWarlock(int level)
+    /// <summary>
+    /// Gets known spells for warlocks
+    /// </summary>
+    /// <param name="level"></param>
+    /// <returns></returns>
+    /// <exception cref="IllegalStateException"></exception>
+    private static int GetWarlock(int level)
     {
         return level switch
         {
@@ -161,8 +187,13 @@ public class SpellService
             _ => throw new IllegalStateException($"Level {level} is invalid"),
         };
     }
-
-    private int GetModifier(int statValue)
+    
+    /// <summary>
+    /// Gets the modifier for a given stat value
+    /// </summary>
+    /// <param name="statValue"></param>
+    /// <returns></returns>
+    private static int GetModifier(int statValue)
     {
         return statValue / 2 - 5;
     }

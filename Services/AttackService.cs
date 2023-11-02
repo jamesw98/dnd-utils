@@ -6,7 +6,7 @@ namespace dnd_utils.Services;
 
 public class AttackService
 {
-    private DiceService _dice;
+    private readonly DiceService _dice;
 
     public AttackService(DiceService dice)
     {

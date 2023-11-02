@@ -8,11 +8,20 @@ public partial class DiceService
 {
     private readonly Random _rand = new();
 
+    /// <summary>
+    /// Rolls detailed, but with advantage or disadvantage
+    /// </summary>
+    /// <param name="num">The number of dice to roll</param>
+    /// <param name="type">The type of die to roll</param>
+    /// <param name="mod">The modifier to add or subtract</param>
+    /// <param name="state">Advantage or Disadvantage</param>
+    /// <param name="modOnEvery">Whether to use the modifier on every die or just the total</param>
+    /// <returns>Roll details</returns>
     public (RollDetails, RollDetails) RollDetailsNonStandard(int num, int type, int mod, AdvantageState state, bool modOnEvery=false)
     {
         if (type != 20)
         {
-            throw new Exception("(Dis)Advantage can only be used with d20s");
+            throw new ArgumentException("(Dis)Advantage can only be used with d20s");
         }
 
         List<RollDetails> rolls = new (new[] { RollDetailed(num, type, mod), RollDetailed(num, type, mod) });
@@ -24,6 +33,15 @@ public partial class DiceService
         return (rolls[0], rolls[1]);
     }
     
+    /// <summary>
+    /// Rolls dice with more detail than a normal roll
+    /// </summary>
+    /// <param name="num">The number of dice to roll</param>
+    /// <param name="type">The type of die to roll</param>
+    /// <param name="mod">The modifier to add or subtract</param>
+    /// <param name="modOnEvery">Whether to use the modifier on every die or just the total</param>
+    /// <param name="rollNum">Used for displaying what "group" the roll belongs to</param>
+    /// <returns></returns>
     public RollDetails RollDetailed(int num, int type, int mod, bool modOnEvery=false, int rollNum=-1)
     {
         var total = 0;
@@ -55,11 +73,16 @@ public partial class DiceService
     }
 
     /// <summary>
-    /// WIP
+    /// Rolls dice based on a formula such as:
+    ///     1d20
+    ///     1d20 + 5
+    ///     1d20 + 5 + 1d6
+    ///     1d20 + 5 + 1d6 + 10
+    ///     etc
     /// </summary>
-    /// <param name="rawFormula"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
+    /// <param name="rawFormula">A string representing the formula to roll</param>
+    /// <param name="rollNum">Used for displaying what "group" this roll belongs to</param>
+    /// <returns>An enumerable of roll results</returns>
     public IEnumerable<RollDetails> RollFromFormula(string rawFormula, int rollNum)
     {
         var runningTotal = 0;
@@ -136,6 +159,14 @@ public partial class DiceService
         return details;
     }
     
+    /// <summary>
+    /// Rolls virtual dice based on the parameters
+    /// </summary>
+    /// <param name="num">The number of dice to roll</param>
+    /// <param name="type">The type of die to roll</param>
+    /// <param name="mod">The modifier to add or subtract to the roll</param>
+    /// <param name="modOnEvery">Whether to use the modifier on every die, or just on the total</param>
+    /// <returns>The result of the roll</returns>
     public int Roll(int num, int type, int mod, bool modOnEvery=false)
     {
         var result = 0;
@@ -151,12 +182,16 @@ public partial class DiceService
         
         return result;
     }
-
+    
+    /// <summary>
+    /// Regex used to help with parsing dice formulas 
+    /// </summary>
     [GeneratedRegex(@"([+-]?)(\d+d\d+|\d+)")]
     private static partial Regex DiceMatch();
     
+    /// <summary>
+    /// Regex to remove all whitespace from a string 
+    /// </summary>
     [GeneratedRegex("\\s+")]
     private static partial Regex RemoveWhiteSpace();
-    [GeneratedRegex("(\\+-)")]
-    private static partial Regex SplitOnModifier();
 }

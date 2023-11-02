@@ -12,7 +12,13 @@ public class AttackService
     {
         _dice = dice;
     }
-
+    
+    /// <summary>
+    /// Re-rolls an attack
+    /// </summary>
+    /// <param name="ar">An attack that's already been rolled</param>
+    /// <param name="creaturesToHit">The creatures to hit with this attack</param>
+    /// <returns>A newly re-rolled attack</returns>
     public AttackResult ReRoll(AttackResult ar, List<Monster> creaturesToHit)
     {
         // these will never be null in this case                
@@ -57,19 +63,29 @@ public class AttackService
                 var damage = a.DamageDetail.Total;
 
                 if (c.Immunities.Contains(a.Type))
+                {
                     damage = 0;
+                }
                 else if (c.Vulnerabilities.Contains(a.Type))
+                {
                     damage *= 2;
+                }
                 else if (c.Resistances.Contains(a.Type))
+                {
                     damage /= 2;
+                }
 
                 if (savingThrow && c.PassedSavingThrow)
+                {
                     damage /= 2;
+                }
 
                 c.HitPoints -= damage;
 
                 if (c.HitPoints < 0)
+                {
                     c.HitPoints = 0;
+                }
             }
         }
 
@@ -78,6 +94,8 @@ public class AttackService
 
     /// <summary>
     /// gets attack results for the given inputs
+    ///
+    /// TODO - this is a lot of params, should probably just make a class, but that's a task for another day
     /// </summary>
     /// <param name="numberOfAttacks"></param>
     /// <param name="toHitModifier"></param>
@@ -110,7 +128,9 @@ public class AttackService
     {
         // check for the impossible state
         if (hasAdvantage && hasDisadvantage)
+        {
             throw new IllegalStateException("Cannot have both advantage and disadvantage!");
+        }
 
         List<AttackResult> results = new();
 
@@ -155,7 +175,9 @@ public class AttackService
 
         results = results.OrderByDescending(x => x.AttackDetail.Total).ToList();
         if (hideMisses)
+        {
             results = results.Where(x => x.Hit).ToList();
+        }
 
         return results;
     }

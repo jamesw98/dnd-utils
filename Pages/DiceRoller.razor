@@ -1,19 +1,27 @@
 ﻿@page "/dice"
 @using dnd_utils.Services
 @using dnd_utils.Models
+@using MudBlazor.Services
 
 @inject DiceService Dice
 @inject ISnackbar Snackbar
+@inject IKeyInterceptorFactory KeyInterceptorFactory
 
 <br/>
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudGrid>
         <MudItem xs="12" sm="7">
             <MudPaper Class="pa-4">
-                <div class="d-flex">
-                    <MudTextField T="string" Label="Formula" @ref="_formula"/>
+                <div class="d-flex" id="formula-container"> 
+                    <MudTextField 
+                        T="string"
+                        Label="Formula"
+                        @ref="_formula"
+                        TextUpdateSuppression="false"
+                        class="formula"
+                        Immediate="true"/>
                     <MudSpacer/>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Roll">Roll</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => { Roll(); })">Roll</MudButton>
                 </div>
                 <br/>
                 or
@@ -24,7 +32,7 @@
                     <MudSpacer/>
                     <MudTextField T="int" Label="Modifier" @ref="_modifier"/>
                     <MudSpacer/>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Roll">Roll</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => { Roll(); })">Roll</MudButton>
                 </div>
                 <br/>
                 <div class="d-flex">
@@ -66,6 +74,37 @@
     private bool _modOnEvery = false;
     private List<RollDetails> _rolls = new();
 
+    private IKeyInterceptor _keyInterceptor;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _keyInterceptor = KeyInterceptorFactory.Create();
+            await _keyInterceptor.Connect("formula-container", new KeyInterceptorOptions()
+            {
+                TargetClass = "formula",
+                Keys = new List<KeyOptions>()
+                {
+                    new() { Key="Enter", PreventDown = "key+none", SubscribeDown = true }
+                }
+            });
+            _keyInterceptor.KeyDown += KeyDown;
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    
+    private void KeyDown(KeyboardEventArgs e)
+    {
+        if (e.ShiftKey)
+        {
+            return;
+        }
+        Roll();
+        StateHasChanged();
+    }
+    
     private void Roll()
     {
         try

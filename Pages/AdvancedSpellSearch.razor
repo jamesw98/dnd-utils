@@ -2,10 +2,12 @@
 @using dnd_utils.Models
 @using dnd_utils.Services
 @using dnd_utils.Exceptions
+@using MudBlazor.Services
 
 @inject SearchService SearchService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject IKeyInterceptorFactory KeyInterceptorFactory
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudText Typo="Typo.h2">
@@ -17,8 +19,8 @@
     <MudItem xs="12" sm="12">
         <MudText Typo="Typo.h5">Filter by:</MudText>
         <MudPaper Class="pa-4">
-            <div class="d-flex">
-                <MudInput T="string" Label="Spell" @bind-Value="_spellName"/>
+            <div class="d-flex" id="spell-name">
+                <MudInput class="spell-name" T="string" Label="Spell" @bind-Value="_spellName" Immediate="true"/>
                 <MudSpacer/>
                 <MudSelect @bind-SelectedValues="_selectedSchools" MultiSelection="true" T="string" Label="School" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var school in _schools)
@@ -139,6 +141,8 @@
     private IEnumerable<string> _selectedRanges = new HashSet<string>();
     private IEnumerable<string> _selectedCastingTimes = new HashSet<string>();
     private IEnumerable<int> _selectedLevels = new HashSet<int>();
+    
+    private IKeyInterceptor _keyInterceptor;
 
     private void PageChanged(int i)
     {
@@ -215,6 +219,35 @@
         var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
 
         await DialogService.ShowAsync<SpellDialog>("", parameters, options);
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _keyInterceptor = KeyInterceptorFactory.Create();
+            await _keyInterceptor.Connect("spell-name", new KeyInterceptorOptions()
+            {
+                TargetClass = "spell-name",
+                Keys = new List<KeyOptions>()
+                {
+                    new() { Key="Enter", PreventDown = "key+none", SubscribeDown = true }
+                }
+            });
+            _keyInterceptor.KeyDown += KeyDown;
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    
+    private void KeyDown(KeyboardEventArgs e)
+    {
+        if (e.ShiftKey)
+        {
+            return;
+        }
+        FindSpells();
+        StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()

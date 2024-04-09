@@ -168,46 +168,62 @@
     {
         var spells = _allSpells.ToList();
         if (_selectedSchools.Any())
+        {
             spells = spells.Where(x => _selectedSchools.Contains(x.School.ToLower())).ToList();
+        }
 
         if (_selectedLevels.Any())
+        {
             spells = spells.Where(x => _selectedLevels.Contains(x.Level)).ToList();
+        }
 
         if (_selectedLists.Any())
+        {
             spells = spells
                 .Where(spell =>
                     _selectedLists
                         .Any(list => spell.InLists
                             .Select(l => l.ToLower()).Contains(list.ToLower())))
                 .ToList();
+        }
 
         if (_selectedSources.Any())
+        {
             spells = spells
                 .Where(spell => _selectedSources
                     .Select(s => s.ToLower())
                     .Contains(spell.Source.ToLower()))
                 .ToList();
+        }
 
         if (_selectedDurations.Any())
+        {
             spells = spells
                 .Where(spell => _selectedDurations
                     .Any(duration => spell.Duration.ToLower().StartsWith(duration.ToLower())))
                 .ToList();
+        }
 
         if (_selectedRanges.Any())
+        {
             spells = spells
                 .Where(spell => _selectedRanges
                     .Any(range => spell.Range.ToLower().StartsWith(range.ToLower())))
                 .ToList();
+        }
 
         if (_selectedCastingTimes.Any())
+        {
             spells = spells
                 .Where(spell => _selectedCastingTimes
                     .Any(time => spell.CastingTime.ToLower().StartsWith(time.ToLower())))
                 .ToList();
+        }
 
         if (_spellName != null && _spellName.Any())
+        {
             spells = spells.Where(x => x.Name.ToLower().Contains(_spellName.ToLower())).ToList();
+        }
 
         _results = spells;
     }
@@ -217,7 +233,6 @@
         var spell = await SearchService.GetSpell(name);
         var parameters = new DialogParameters { { "Spell", spell }, { "SpellId", spellId } };
         var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
-
         await DialogService.ShowAsync<SpellDialog>("", parameters, options);
     }
     

@@ -116,21 +116,30 @@
     {
         var spells = _allItems.ToList();
         if (_selectedTypes.Any())
+        {
             spells = spells.Where(x => _selectedTypes.Contains(x.Type.ToLower())).ToList();
+        }
 
         if (_selectedRarities.Any())
+        {
             spells = spells.Where(x => _selectedRarities.Contains(x.Rarity.ToLower())).ToList();
+        }
 
 
         if (_selectedSources.Any())
+        {
             spells = spells
                 .Where(spell => _selectedSources
                     .Select(s => s.ToLower())
                     .Contains(spell.Source.ToLower()))
                 .ToList();
+        }
+
 
         if (_itemName != null && _itemName.Any())
+        {
             spells = spells.Where(x => x.Name.ToLower().Contains(_itemName.ToLower())).ToList();
+        }
 
         _results = spells;
     }

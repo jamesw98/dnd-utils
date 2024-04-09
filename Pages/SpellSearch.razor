@@ -45,18 +45,20 @@
 
     private async Task ViewSpell()
     {
-        if (_spellName == null)
-            return;
-
-        _spell = await SearchService.GetSpell(_spellName);
+        if (_spellName != null)
+        {
+            _spell = await SearchService.GetSpell(_spellName);
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
         var tempSpells = await SearchService.GetSpellList();
 
-        if (tempSpells != null)
+        if (tempSpells.Any())
+        {
             _spells = tempSpells;
+        }
     }
 
 }

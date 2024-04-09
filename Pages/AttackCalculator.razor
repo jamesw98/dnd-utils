@@ -55,11 +55,9 @@
 
     private async Task OnButtonClicked(AttackResult ar)
     {
-        var message = "";
-        if (ar.UnusedAttackDetail != null)
-            message = $"<b>To hit:</b> <br /> <u>{ar.AttackDetail}</u> <br />{ar.UnusedAttackDetail}<br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}";
-        else
-            message = $"<b>To hit:</b> <br /> {ar.AttackDetail} <br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}";
+        var message = ar.UnusedAttackDetail != null 
+            ? $"<b>To hit:</b> <br /> <u>{ar.AttackDetail}</u> <br />{ar.UnusedAttackDetail}<br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}" 
+            : $"<b>To hit:</b> <br /> {ar.AttackDetail} <br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}";
 
         await DialogService.ShowMessageBox("Attack Result Info", (MarkupString)message);
 

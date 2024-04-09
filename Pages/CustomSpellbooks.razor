@@ -222,7 +222,9 @@
             _book.SlotsForLevel = _spellSlots;
 
             foreach (var slot in _spellSlots.Keys.Where(slot => !_book.SpellsForLevel.ContainsKey(slot)))
+            {
                 _book.SpellsForLevel[slot] = new List<Spell>();
+            }
         }
     }
 
@@ -254,7 +256,9 @@
         }
 
         if (int.TryParse(statText, out var parsedInt))
+        {
             _characterStatValue = parsedInt;
+        }
 
         _spellsKnown = SpellService.GetNumberOfKnownSpells(_className, _characterLevel, _characterStatValue ?? 0);
 
@@ -264,7 +268,9 @@
     private async Task LevelChanged(string levelText)
     {
         if (int.TryParse(levelText, out var parsedInt))
+        {
             _characterLevel = parsedInt;
+        }
 
         await GetSpellSlots();
     }
@@ -276,14 +282,16 @@
         _possibleSpellsForCharacter = allSpells.Where(x => x.Level <= maxLevel).ToList();
 
         if (!_allowSpellsFromOtherLists)
+        {
             _possibleSpellsForCharacter = _possibleSpellsForCharacter
                 .Where(x => x.InLists.Contains(_className))
                 .ToList();
+        }
     }
 
     private async Task SaveBook()
     {
-        if (_characterName != null && _className != null && _characterStatValue != null)
+        if (_characterName != null && _className != null && _characterStatValue != null && _book != null)
         {
             if (!_savedCharacterNames.Contains(_characterName))
             {
@@ -340,8 +348,10 @@
             return;
         }
 
-        foreach (Spell? spell in _book.SpellsForLevel.Keys.SelectMany(level => _book.SpellsForLevel[level]))
+        foreach (var spell in _book.SpellsForLevel.Keys.SelectMany(level => _book.SpellsForLevel[level]))
+        {
             spell.PageContent = (await SearchService.GetSpell(spell.Name)).PageContent;
+        }
     }
 
     protected override async Task OnInitializedAsync()
@@ -351,12 +361,16 @@
             _classes = await SearchService.GetClassList();
 
             if (await Storage.ContainKeyAsync("savedcharacters"))
+            {
                 _savedCharacterNames = await Storage.GetItemAsync<List<string>>("savedcharacters");
+            }
 
             if (_savedCharacterNames.Any())
             {
                 foreach (var name in _savedCharacterNames)
+                {
                     _savedBooks.Add(await Storage.GetItemAsync<Spellbook>($"{name}_book"));
+                }
             }
         }
         catch (Exception e)

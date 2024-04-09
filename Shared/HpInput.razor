@@ -162,13 +162,17 @@
     {
         var number = 1;
         if (_createMultiple)
+        {
             number = _numberOfCreatures.Value;
+        }
 
-        for (int i = 0; i < number; i++)
+        for (var i = 0; i < number; i++)
         {
             var name = _creatureName.Value;
             if (_createMultiple)
+            {
                 name += i + 1;
+            }
 
             Creatures.Add(new Monster
             {
@@ -192,21 +196,31 @@
         foreach (var c in Creatures)
         {
             if (c.Immunities.Contains(_damageType))
+            {
                 continue;
+            }
 
             var currDamage = _damage.Value;
             if (c.PassedSavingThrow)
+            {
                 currDamage /= 2;
+            }
 
             if (c.Resistances.Contains(_damageType))
+            {
                 currDamage /= 2;
+            }
 
             if (c.Vulnerabilities.Contains(_damageType))
+            {
                 currDamage *= 2;
+            }
 
             c.HitPoints -= currDamage;
             if (c.HitPoints < 0)
+            {
                 c.HitPoints = 0;
+            }
         }
         await InvokeCreatures();
     }

@@ -41,7 +41,9 @@
     private async Task<IEnumerable<Spell>> Search(string query)
     {
         if (string.IsNullOrEmpty(query))
+        {
             return Array.Empty<Spell>();
+        }
 
         var spells = Spells
             .Where(x => x.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase));

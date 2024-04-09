@@ -44,19 +44,28 @@ public class AttackService
     /// <param name="attacks">the attacks to be dealt</param>
     /// <param name="savingThrow">whether or not this is a saving throw</param>
     /// <returns>an updated list of creatures with reduced hp (if the attacks hit)</returns>
-    public List<Monster> DealDamage(List<Monster> creatures, IEnumerable<Monster> creaturesToHit,
-        List<AttackResult> attacks, bool savingThrow)
+    public static List<Monster> DealDamage
+    (
+        List<Monster> creatures,
+        IEnumerable<Monster> creaturesToHit,
+        List<AttackResult> attacks,
+        bool savingThrow
+    )
     {
         foreach (var a in attacks)
         {
-            var creaturesHit =
-                savingThrow ? creatures : creatures.Where(x => x.ArmorClass <= a.AttackDetail.Total).ToList();
+            var creaturesHit = savingThrow 
+                ? creatures 
+                : creatures.Where(x => x.ArmorClass <= a.AttackDetail.Total).ToList();
+            
             a.CreaturesTargeted = creaturesToHit.ToList();
 
             foreach (var c in creaturesHit)
             {
                 if (!creaturesToHit.Select(x => x.Name).Contains(c.Name))
+                {
                     continue;
+                }
 
                 a.CreaturesHit.Add(c);
 
@@ -110,7 +119,8 @@ public class AttackService
     /// <param name="fixedDamage">if not -1, do not roll for damage</param>
     /// <returns></returns>
     /// <exception cref="IllegalStateException"></exception>
-    public List<AttackResult> CalculateAttackResults(
+    public List<AttackResult> CalculateAttackResults
+    (
         string attackName,
         int numberOfAttacks,
         int toHitModifier,
@@ -151,14 +161,19 @@ public class AttackService
                 (usedToHitRoll, unusedToHitRoll) = _dice.RollDetailsNonStandard(1, 20, toHitModifier, state);
             }
             else
+            {
                 usedToHitRoll = _dice.RollDetailed(1, 20, toHitModifier);
+            }
 
             currentAttack.Hit = usedToHitRoll.Total >= acToBeat;
             currentAttack.AttackDetail = usedToHitRoll;
             currentAttack.UnusedAttackDetail = unusedToHitRoll;
             currentAttack.Crit = autoCrit || usedToHitRoll.Rolls.Contains(20);
 
-            var diceNum = currentAttack.Crit ? damageDieNum * 2 : damageDieNum;
+            var diceNum = currentAttack.Crit 
+                ? damageDieNum * 2 
+                : damageDieNum;
+            
             var damage = fixedDamage == -1
                 ? _dice.RollDetailed(diceNum, damageDieType, damageModifier)
                 : new RollDetails

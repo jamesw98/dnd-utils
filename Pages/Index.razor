@@ -8,13 +8,16 @@
     <MudText Typo="Typo.h2" Align="Align.Center">
         Dungeon and Dragon's Utilities
     </MudText>
+    <MudTooltip Arrow="false" Placement="Placement.Top" Text="New quote">
+        <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Inherit" Edge="Edge.Start" OnClick="NewQuote"/>
+    </MudTooltip>
     <MudDivider/>
     <br/>
     <MudText Typo="Typo.h4" Align="Align.Center">
-        @((MarkupString)Regex.Replace(HttpUtility.HtmlEncode(_message), "\r?\n|\r", "<br />"))
+        @((MarkupString)Regex.Replace(HttpUtility.HtmlEncode(_message ?? ""), "\r?\n|\r", "<br />"))
     </MudText>
     <br/>
-    <MudDivider></MudDivider>
+    <MudDivider/>
     <br/>
     <MudText Typo="Typo.h4">
         <b>So, what is this site?</b>
@@ -29,10 +32,10 @@
 </MudContainer>
 
 @code {
-    private Random _random = new();
-    private string _message;
+    private readonly Random _random = new();
+    private string? _message;
 
-    private string[] _quotes =
+    private readonly string[] _quotes =
     {
         "\"Cockroaches are generally pretty wet\"\n -  DM",
         "\"It's like sea world!\"\n -  Sandor, in reference to cockroaches jumping into sewer water",
@@ -205,7 +208,7 @@
         "\"He (Timothee Chalamet) has that male body that I crave, but not in that way.\"\n - DM",
         "\"Detroit: Commit Murder\"\n - Ed",
         "\"3x3 Crab Being\"\n - Sandor, after polymorphing into a Huge Giant Crab",
-        "\"True dat my rogueu brother.\"\n - Gareb",
+        "\"True dat my rogue brother.\"\n - Gareb",
         "\"I feel quirky, I wanna shoot someone in the foot.\"\n - Gareb",
         "\"Ass...\"\n - Gareb",
         "\"Gareb has to sit in time out.\"\n - DM",
@@ -213,6 +216,11 @@
     };
 
     protected override void OnInitialized()
+    {
+        NewQuote();
+    }
+
+    private void NewQuote()
     {
         _message = _quotes[_random.Next(_quotes.Length)];
     }

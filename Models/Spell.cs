@@ -13,6 +13,7 @@ public class Spell
     public string[] Components { get; set; }
     public string Range { get; set; }
     public string Duration { get; set; }
+    public string WikidotLink { get; set; }
 
     public override string ToString()
     {

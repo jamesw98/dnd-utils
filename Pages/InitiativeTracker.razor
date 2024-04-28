@@ -2,49 +2,64 @@
 @using dnd_utils.Models
 
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
     <MudText Typo="Typo.h2">
-        "Simple" Initiative Tracker
+        Initiative Tracker
     </MudText>
     <MudDivider/>
 </MudContainer>
 <br/>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <MudGrid>
-        <MudItem xs="16" sm="7">
-            <MonsterInput @bind-Monsters="_creatures"/>
-        </MudItem>
-        <MudItem xs="16" sm="5">
-            <MudPaper Class="pa-4">
-                <MudTable Items="_creatures">
-                    <HeaderContent>
-                        <MudTh>Initiative</MudTh>
-                        <MudTh>Name</MudTh>
-                        <MudTh>Edit</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@context.Initiative</MudTd>
-                        <MudTd>@context.Name</MudTd>
-                        <MudTd>
-                            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => OpenDialog(context))"/>
-                        </MudTd>
-                    </RowTemplate>
-                </MudTable>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudFab Style="position:fixed; bottom:10%;right:10%"
+            Color=@Color.Tertiary
+            Icon=@Icons.Material.Filled.Add
+            OnClick="OpenCreateDialog"/>
+
+    <MudTable Items="_creatures">
+        <ColGroup>
+            <col style="width: 3%"/>
+            <col/>
+            <col style="width: 10%"/>
+            <col/>
+            <col style="width: 3%"/>
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>Initiative</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>HP</MudTh>
+            <MudTh>Dead?</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Initiative</MudTd>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>
+                <MudNumericField @bind-Value="@context.HitPoints" Label="HP" Variant="Variant.Text"/>
+            </MudTd>
+            <MudTd>
+                <MudCheckBox @bind-Value="@context.Dead"/>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
 </MudContainer>
 
 @code {
     private List<Monster> _creatures = new();
 
-    private void OpenDialog(Monster monster) 
+    private void OpenCreateDialog()
     {
-        var parameters = new DialogParameters { { "Monster", monster } };
-        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        DialogParameters parameters = new()
+        {
+            { "MonsterCreatedMethod", EventCallback.Factory.Create<IEnumerable<Monster>>(this, AddMonsters) }
+        };
+        DialogService.ShowAsync<CreateMonsterDialog>("Add Creatures", parameters);
+    }
 
-        DialogService.Show<EditInitiativeDialog>("", parameters, options);
+    private void AddMonsters(IEnumerable<Monster> monsters)
+    {
+        _creatures.AddRange(monsters);
+        _creatures = _creatures.OrderByDescending(x => x.Initiative).ToList();
     }
 }

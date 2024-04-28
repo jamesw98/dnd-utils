@@ -15,6 +15,7 @@ public class Monster
     public List<DamageType> Resistances { get; set; } = new();
     public List<DamageType> Vulnerabilities { get; set; } = new();
     public List<DamageType> Immunities { get; set; } = new();
+    public bool Dead { get; set; }
 
     public override string ToString()
     {

@@ -81,10 +81,12 @@ public partial class DiceService
     ///     etc
     /// </summary>
     /// <param name="rawFormula">A string representing the formula to roll</param>
-    /// <param name="rollNum">Used for displaying what "group" this roll belongs to</param>
+    /// <param name="rollNum">Optional: Used for displaying what "group" this roll belongs to</param>
     /// <returns>An enumerable of roll results</returns>
-    public IEnumerable<RollDetails> RollFromFormula(string rawFormula, int rollNum)
+    public IEnumerable<RollDetails> RollFromFormula(string rawFormula, int rollNum=0)
     {
+        Console.WriteLine(rawFormula);
+        
         var runningTotal = 0;
         List<RollDetails> details = new();
         
@@ -182,6 +184,29 @@ public partial class DiceService
         
         return result;
     }
+
+    public static bool ValidateFormula(string formula)
+    {
+        // get rid of all white space
+        var trimmed = RemoveWhiteSpace().Replace(formula, "");
+        // find matches that match the regex
+        var matches = DiceMatch().Matches(trimmed);
+        
+        // something is wrong with the formula the user sent
+        return matches.Any();
+    }
+    
+    /// <summary>
+    /// Matches a modifier for a dice roll. 
+    /// </summary>
+    [GeneratedRegex(@"[+-]\s*\d+")]
+    public static partial Regex Modifier();
+    
+    /// <summary>
+    /// Regex to remove all whitespace from a string 
+    /// </summary>
+    [GeneratedRegex("\\s+")]
+    public static partial Regex RemoveWhiteSpace();
     
     /// <summary>
     /// Regex used to help with parsing dice formulas 
@@ -189,9 +214,4 @@ public partial class DiceService
     [GeneratedRegex(@"([+-]?)(\d+d\d+|\d+)")]
     private static partial Regex DiceMatch();
     
-    /// <summary>
-    /// Regex to remove all whitespace from a string 
-    /// </summary>
-    [GeneratedRegex("\\s+")]
-    private static partial Regex RemoveWhiteSpace();
 }

@@ -15,11 +15,6 @@ public class BasicItems(ILogger<BasicItems> logger, AuthUtil authUtil, MongoUtil
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req, [FromBody] CustomItem customItem)
     {
         var user = await authUtil.GetUser(req.Headers);
-        if (user is null)
-        {
-            return new UnauthorizedResult();
-        }
-
         return req.Method switch
         {
             "GET" => GetItems(user),
@@ -33,8 +28,12 @@ public class BasicItems(ILogger<BasicItems> logger, AuthUtil authUtil, MongoUtil
     /// </summary>
     /// <param name="user">The user making the request.</param>
     /// <returns>All items the user has created.</returns>
-    private OkObjectResult GetItems(User user)
+    private IActionResult GetItems(User? user)
     {
+        if (user is null)
+        {
+            return new NotFoundResult();
+        }
         return new OkObjectResult(mongoUtil.GetItemsForUser(user.UserId));
     }
 
@@ -44,8 +43,13 @@ public class BasicItems(ILogger<BasicItems> logger, AuthUtil authUtil, MongoUtil
     /// <param name="user">The user making the request.</param>
     /// <param name="item">The item the user wants to make.</param>
     /// <returns></returns>
-    private OkResult Post(User user, CustomItem item)
+    private IActionResult Post(User? user, CustomItem item)
     {
+        if (user is null)
+        {
+            return new UnauthorizedResult();
+        }
+
         mongoUtil.CreateItem(user.UserId, item);
         return new OkResult();
     }

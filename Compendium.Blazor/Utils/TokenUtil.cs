@@ -16,15 +16,11 @@ public class TokenUtil
     public async Task GetJwt(ISessionStorageService storage)
     {
         var storageValue = await storage.GetItemAsync<ExpandoObject>("oidc.user:https://dev-ynk4u5ds6uw2ccfl.us.auth0.com:dvWTe0G1XvXSQoFOVNw0GbdnmSzXFLsQ");
-        if (storageValue is null)
-        {
-            throw new UnauthorizedAccessException("Not authenticated");
-        }
 
-        var token = storageValue.FirstOrDefault(x => x.Key == "id_token").Value;
+        var token = storageValue?.FirstOrDefault(x => x.Key == "id_token").Value;
         if (token is null)
         {
-            throw new UnauthorizedAccessException("Not authenticated");
+            return;
         }
         
         Jwt = token.ToString()!;

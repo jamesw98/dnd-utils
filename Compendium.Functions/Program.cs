@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("https://localhost:7085") // Correct Blazor origin
+        policy.WithOrigins("https://localhost:7085", "http://skimbeeble.co")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });

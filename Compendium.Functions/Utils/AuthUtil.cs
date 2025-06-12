@@ -32,7 +32,7 @@ public class AuthUtil
         // Attempt to get the Authorization header.
         if (!headers.TryGetValue("Authorization", out var authToken))
         {
-            throw new UnauthorizedAccessException("No token found");
+            return null;
         }
 
         // Get the JWT from the header.

@@ -272,7 +272,7 @@ public class ApiUtil
         var request = new HttpRequestMessage(method, $"{_functionsUri}{uri}");
         request.Headers.TryAddWithoutValidation("accept", "*/*");
 
-        if (authenticated)
+        if (authenticated && _tokenUtil.Jwt != string.Empty)
         {
             request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {_tokenUtil.Jwt}");
         }

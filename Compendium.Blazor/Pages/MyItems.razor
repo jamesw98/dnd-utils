@@ -1,42 +1,60 @@
 @inject ApiUtil Api
+@inject ISnackbar Snackbar
 
 @page "/custom-items"
 
 <MudContainer MaxWidth="MaxWidth.Small">
-    @if (_items?.Count != 0)
-    {
-        <MudText Typo="Typo.h3">Your Custom Items</MudText>
-        <br/>
-        <MudTable T="CustomItem" Items="_items">
-            <HeaderContent>
-                <MudTh>Name</MudTh>
-                <MudTh>View</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd>@context.Name</MudTd>
-                <MudTd>
-                    <MudButton Color="Color.Success" Variant="Variant.Outlined" Href="@($"/item/{context.ItemId}")">
-                        View
-                    </MudButton>
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
-    }
-    else if (_items?.Count == 0)
-    {
-        <MudText Typo="Typo.h3">No items found.</MudText>
-    }
+    <AuthorizeView @ref="_auth">
+        <NotAuthorized>
+            <MudText Typo="Typo.h2" Align="Align.Center">Skim Beeble wants to know who you are before you look at his wares!</MudText>
+            <MudText Typo="Typo.subtitle1" Align="Align.Center">(Please log in to view this page)</MudText>
+        </NotAuthorized>
+        <Authorized Context="AuthContext">
+            @if (_items?.Count != 0)
+            {
+                <MudText Typo="Typo.h2">Your Custom Items</MudText>
+                <br/>
+                <MudTable  T="CustomItem" Items="_items">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>View</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>
+                            <MudButton Color="Color.Success" Variant="Variant.Outlined"
+                                       Href="@($"/item/{context.ItemId}")">
+                                View
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+            else if (_items?.Count == 0)
+            {
+                <MudText Typo="Typo.h3">No items found.</MudText>
+            }
+        </Authorized>
+    </AuthorizeView>
 </MudContainer>
 
 @code {
 
+    private AuthorizeView _auth;
     private List<CustomItem>? _items;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _items = await Api.GetItemsForUser();
+            try
+            {
+                _items = await Api.GetItemsForUser();
+            }
+            catch (Exception e)
+            {
+                Snackbar.Add("You must be logged in to view this page.", Severity.Warning);
+            }
             StateHasChanged();
         }
     }

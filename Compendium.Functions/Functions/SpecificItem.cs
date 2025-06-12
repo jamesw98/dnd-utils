@@ -15,11 +15,6 @@ public class SpecificItem(ILogger<SpecificItem> logger, AuthUtil authUtil, Mongo
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "put", "delete", Route = "Item/{ItemGuid}")] HttpRequest req, [FromBody] CustomItem customItem, [FromRoute] Guid itemGuid)
     {
         var user = await authUtil.GetUser(req.Headers);
-        if (user is null)
-        {
-            return new UnauthorizedResult();
-        }
-
         return req.Method switch
         {
             "GET" => GetItem(user, itemGuid),
@@ -32,6 +27,7 @@ public class SpecificItem(ILogger<SpecificItem> logger, AuthUtil authUtil, Mongo
     /// Gets all items a user has created.
     /// </summary>
     /// <param name="user">The user making the request.</param>
+    /// <param name="guid">The ID of the item to get.</param>
     /// <returns>All items the user has created.</returns>
     private OkObjectResult GetItem(User? user, Guid guid)
     {
@@ -44,8 +40,13 @@ public class SpecificItem(ILogger<SpecificItem> logger, AuthUtil authUtil, Mongo
     /// <param name="user">The user making the request.</param>
     /// <param name="item">The item the user wants to make.</param>
     /// <returns></returns>
-    private OkResult UpdateItem(User user, CustomItem item)
+    private IActionResult UpdateItem(User? user, CustomItem item)
     {
+        if (user is null)
+        {
+            return new UnauthorizedResult();
+        }
+
         // mongoUtil.CreateItem(user.UserId, item);
         // TODO: Add update item method.
         return new OkResult();

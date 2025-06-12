@@ -1,0 +1,26 @@
+/* _content/PSC.Blazor.Components.MarkdownEditor/MarkdownEditor.razor.rz.scp.css */
+img[b-q0ic0onmfd]
+{
+    max-width: 100%;
+}
+
+button.table[b-q0ic0onmfd] {
+    width: 30px !important;
+}
+
+div.grippie[b-q0ic0onmfd] {
+    background: #EEEEEE url(grippie.png) no-repeat scroll center 2px;
+    border-color: #DDDDDD;
+    border-style: solid;
+    border-width: 0pt 1px 1px;
+    cursor: s-resize;
+    height: 9px;
+    overflow: hidden;
+}
+
+.resizable-textarea textarea[b-q0ic0onmfd] {
+    display: block;
+    margin-bottom: 0pt;
+    width: 50%;
+    height: 30%;
+}

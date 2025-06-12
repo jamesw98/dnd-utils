@@ -1,0 +1,171 @@
+﻿@page "/items"
+@using Compendium.Blazor.Shared
+@using Compendium.Models
+@using Compendium.Services
+@using Compendium.Exceptions
+
+@inject SearchService SearchService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2">
+        D&D Item Search
+    </MudText>
+</MudContainer>
+
+@if (_itemOptions != null)
+{
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudItem xs="12" sm="12">
+            <MudText Typo="Typo.h5">Filter by:</MudText>
+            <MudPaper Class="pa-4">
+                <div class="d-flex">
+                    <MudInput T="string" Label="Spell" @bind-Value="_itemName"/>
+                    <MudSpacer/>
+                    <MudSelect @bind-SelectedValues="_selectedRarities" MultiSelection="true" T="string" Label="Rarities" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var rarity in _itemOptions.Rarities)
+                        {
+                            <MudSelectItem T="string" Value="@rarity"/>
+                        }
+                    </MudSelect>
+                    <MudSpacer/>
+                    <MudSelect @bind-SelectedValues="_selectedTypes" MultiSelection="true" T="string" Label="Item Types" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var type in _itemOptions.Types)
+                        {
+                            <MudSelectItem T="string" Value="@type"/>
+                        }
+                    </MudSelect>
+                    <MudSpacer/>
+                    <MudSelect @bind-SelectedValues="_selectedSources" MultiSelection="true" T="string" Label="Source" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var source in _itemOptions.Sources)
+                        {
+                            <MudSelectItem T="string" Value="@source"/>
+                        }
+                    </MudSelect>
+                    <MudSpacer/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Inherit" Edge="Edge.Start" OnClick="Reset"/>
+                    <MudSpacer/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Edge="Edge.Start" OnClick="FindItems"/>
+                </div>
+            </MudPaper>
+        </MudItem>
+        <br/>
+        @if (_results.Any())
+        {
+            <MudPaper Class="pa-4">
+                <MudTable @ref="@_table" Items="@_results" RowsPerPage="8" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Rarity</MudTh>
+                        <MudTh>Type</MudTh>
+                        <MudTh>View</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>@($"{context.Rarity[0].ToString().ToUpper()}{context.Rarity[1..]}")</MudTd>
+                        <MudTd>@($"{context.Type[0].ToString().ToUpper()}{context.Type[1..]}")</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.RemoveRedEye"
+                                           Color="Color.Primary"
+                                           Variant="Variant.Filled"
+                                           OnClick="async () => { await ViewItem(context.Name, context.Id); }"/>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudPagination SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
+                    </PagerContent>
+                </MudTable>
+            </MudPaper>
+        }
+        else
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+        }
+    </MudContainer>
+}
+
+    
+@code {
+    private string? _itemName;
+    private List<DndItem> _allItems = new();
+    private ItemOptions? _itemOptions;
+
+    private List<DndItem> _results = new();
+
+    private MudTable<DndItem> _table;
+
+    private IEnumerable<string> _selectedRarities = new HashSet<string>();
+    private IEnumerable<string> _selectedTypes = new HashSet<string>();
+    private IEnumerable<string> _selectedSources = new HashSet<string>();
+
+    private void PageChanged(int i)
+    {
+        _table.NavigateTo(i - 1);
+    }
+
+    private void Reset()
+    {
+        _selectedRarities = Enumerable.Empty<string>();
+        _selectedTypes = Enumerable.Empty<string>();
+        _selectedSources = Enumerable.Empty<string>();
+        _itemName = null;
+    }
+
+    // primus forgive me for the code below
+    private void FindItems()
+    {
+        var spells = _allItems.ToList();
+        if (_selectedTypes.Any())
+        {
+            spells = spells.Where(x => _selectedTypes.Contains(x.Type.ToLower())).ToList();
+        }
+
+        if (_selectedRarities.Any())
+        {
+            spells = spells.Where(x => _selectedRarities.Contains(x.Rarity.ToLower())).ToList();
+        }
+
+
+        if (_selectedSources.Any())
+        {
+            spells = spells
+                .Where(spell => _selectedSources
+                    .Select(s => s.ToLower())
+                    .Contains(spell.Source.ToLower()))
+                .ToList();
+        }
+
+
+        if (_itemName != null && _itemName.Any())
+        {
+            spells = spells.Where(x => x.Name.ToLower().Contains(_itemName.ToLower())).ToList();
+        }
+
+        _results = spells;
+    }
+
+    private async Task ViewItem(string name, int itemId)
+    {
+        var item = await SearchService.GetItem(name);
+        var parameters = new DialogParameters { { "Item", item }, { "itemId", itemId } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
+
+        await DialogService.ShowAsync<ItemDialog>("", parameters, options);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _itemOptions = await SearchService.GetItemOptions();
+            _allItems = await SearchService.GetAllItems();
+            _results = _allItems;
+        }
+        catch (NotFoundException nfe)
+        {
+            Snackbar.Add(nfe.Message, Severity.Error);
+        }
+    }
+
+}

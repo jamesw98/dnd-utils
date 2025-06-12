@@ -1,0 +1,66 @@
+﻿@page "/initiative"
+@using Compendium.Blazor.Shared
+@using Compendium.Models
+
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <MudText Typo="Typo.h2">
+        Initiative Tracker
+    </MudText>
+    <MudDivider/>
+</MudContainer>
+<br/>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudFab Style="position:fixed; bottom:10%;right:10%"
+            Color=@Color.Tertiary
+            Icon=@Icons.Material.Filled.Add
+            OnClick="OpenCreateDialog"/>
+
+    <MudTable Items="_creatures">
+        <ColGroup>
+            <col style="width: 3%"/>
+            <col/>
+            <col style="width: 10%"/>
+            <col/>
+            <col style="width: 3%"/>
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>Initiative</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>HP</MudTh>
+            <MudTh>Dead?</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Initiative</MudTd>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>
+                <MudNumericField @bind-Value="@context.HitPoints" Label="HP" Variant="Variant.Text"/>
+            </MudTd>
+            <MudTd>
+                <MudCheckBox @bind-Value="@context.Dead"/>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+@code {
+    private List<Monster> _creatures = new();
+
+    private void OpenCreateDialog()
+    {
+        DialogParameters parameters = new()
+        {
+            { "MonsterCreatedMethod", EventCallback.Factory.Create<IEnumerable<Monster>>(this, AddMonsters) }
+        };
+        DialogService.ShowAsync<CreateMonsterDialog>("Add Creatures", parameters);
+    }
+
+    private void AddMonsters(IEnumerable<Monster> monsters)
+    {
+        _creatures.AddRange(monsters);
+        _creatures = _creatures.OrderByDescending(x => x.Initiative).ToList();
+    }
+}

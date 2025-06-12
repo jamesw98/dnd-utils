@@ -1,0 +1,151 @@
+﻿@using Compendium.Models
+@using Compendium.Services
+
+@inject DiceService Dice
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-4">
+    <MudTextField @bind-Value="@_name" Label="Name" Variant="Variant.Outlined" Required="true"/>
+    <br/>
+    <MudGrid>
+        <MudItem xs="8">
+            <MudTextField @bind-Value="@_initiativeFormula" Label="Initiative" Variant="Variant.Outlined" Required="true"/>
+        </MudItem>
+        <MudItem xs="4">
+            <MudSwitch @bind-Value="@_fixedInitiative"
+                       Label="Fixed initiative"
+                       Color="Color.Info"/>
+        </MudItem>
+    </MudGrid>
+    <MudSpacer/>
+    <MudGrid>
+        <MudItem xs="8">
+            <MudTextField @bind-Value="@_hpFormula" Label="HP" Variant="Variant.Outlined" Required="true"/>
+        </MudItem>
+        <MudItem xs="4">
+            <MudSwitch @bind-Value="@_fixedHp"
+                       Label="Fixed HP"
+                       Color="Color.Info"/>
+        </MudItem>
+    </MudGrid>
+    <br/>
+    <MudGrid>
+        <MudItem xs="8">
+            <MudButton Color="Color.Tertiary" Variant="Variant.Filled" OnClick="CreateMonster">Create</MudButton>
+        </MudItem>
+        <MudItem xs="4">
+            <MudNumericField @bind-Value="_howMany" Label="How many?" Variant="Variant.Text" Min="1" Max="100" />
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }    
+    
+    [Parameter]
+    public EventCallback<IEnumerable<Monster>> MonsterCreatedMethod { get; set; }
+
+    private bool _fixedInitiative = false;
+    private bool _fixedHp = false;
+    
+    private int _howMany = 1;
+
+    private string? _name;
+    private string? _initiativeFormula;
+    private string? _hpFormula;
+
+    private string? _statusToAdd;
+
+    private void CreateMonster()
+    {
+        var monsters = new List<Monster>();
+        for (var i = 0; i < _howMany; i++)
+        {
+            var name = _howMany == 1 
+                ? _name 
+                : $"{_name} {i + 1}";
+
+            if (!Validate())
+            {
+                return;
+            }
+
+            int initiative;
+            int hp;
+            try
+            {
+                initiative = _fixedInitiative
+                    ? int.Parse(_initiativeFormula!)
+                    : RollInit(_initiativeFormula!);
+                
+                hp = _fixedHp
+                    ? int.Parse(_hpFormula!)
+                    : Dice.RollFromFormula(_hpFormula!).First().Total;
+            }
+            catch (ArgumentException ex)
+            {
+                Snackbar.Add(ex.Message);
+                return;
+            }
+            
+            // The ! operator here is save since we already passed checks in Validate()
+            monsters.Add(new Monster
+            {
+                Name = name!,
+                Initiative = initiative,
+                HitPoints = hp
+            });
+        }
+        MonsterCreatedMethod.InvokeAsync(monsters);
+        MudDialog.Close();
+    }
+    
+    private int RollInit(string modifier)
+    {
+        var cleaned = DiceService.RemoveWhiteSpace().Replace(modifier, "");
+        return Dice.RollFromFormula($"1d20{cleaned}")
+            .First()
+            .Total;
+    }
+    
+    private bool Validate()
+    {
+        // These fields are required.
+        if (_name is null || _initiativeFormula is null || _hpFormula is null)
+        {
+            Snackbar.Add("Missing required field.", Severity.Error);
+            return false;
+        }
+        
+        // If we're using fixed initiative, make sure they just entered an int.
+        if (_fixedInitiative && !int.TryParse(_initiativeFormula, out _))
+        {
+            Snackbar.Add("Could not parse fixed initiative.", Severity.Error);
+            return false;
+        }
+        
+        // If they're using a formula, ensure it's valid.
+        if (!_fixedInitiative && !DiceService.Modifier().Matches(_initiativeFormula).Any())
+        {
+            Snackbar.Add("Could not parse initiative formula.", Severity.Error);
+            return false;
+        }
+
+        if (_fixedHp && !int.TryParse(_hpFormula, out _))
+        {
+            Snackbar.Add("Could not parse fixed HP.", Severity.Error);
+            return false;
+        }
+        
+        // If they're using a formula, ensure it's valid.
+        if (!_fixedHp && !DiceService.ValidateFormula(_hpFormula))
+        {
+            Snackbar.Add("Could not parse HP formula.", Severity.Error);
+            return false;
+        }
+        
+        return true;
+    }
+
+}

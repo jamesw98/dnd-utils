@@ -1,0 +1,35 @@
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+@inject NavigationManager Navigation
+@inject SignOutSessionStateManager SignOutManager
+@inject IDialogService DialogService
+
+<AuthorizeView>
+    <Authorized>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="BeginSignOut">Logout</MudButton>
+    </Authorized>
+    <NotAuthorized>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" HRef="@("authentication/login")">Login</MudButton>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code{
+
+    private async Task OpenDeckCreationDialog()
+    {
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        // await DialogService.ShowAsync<CreateDeckDialog>("Create Deck", options);
+    }
+
+    private async Task OpenMatchCreationDialog()
+    {
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        // await DialogService.ShowAsync<CreateMatchDialog>("Add Match", options);
+    }
+    
+    private async Task BeginSignOut(MouseEventArgs args)
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/logout");
+    }
+}

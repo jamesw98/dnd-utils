@@ -1,0 +1,37 @@
+@inject ApiUtil Api
+@using Markdig;
+
+@page "/item/{ItemId}"
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    @if (CustomItem is not null)
+    {
+        <br/>
+        <MudPaper Class="pa-4 mud-height-full">
+            <div class="markdown-body">
+                @((MarkupString)Markdown.ToHtml(CustomItem.FullText))
+            </div>
+        </MudPaper>
+    }
+    else if (_loaded)
+    {
+        <MudText Typo="Typo.h3">Could not find item.</MudText>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public string ItemId { get; set; }
+    private CustomItem? CustomItem { get; set; }
+    private bool _loaded = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            CustomItem = await Api.GetItem(Guid.Parse(ItemId));
+            _loaded = true;
+            StateHasChanged();
+        }
+    }
+
+}

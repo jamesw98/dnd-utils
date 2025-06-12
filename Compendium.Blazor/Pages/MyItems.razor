@@ -1,0 +1,44 @@
+@inject ApiUtil Api
+
+@page "/custom-items"
+
+<MudContainer MaxWidth="MaxWidth.Small">
+    @if (_items?.Count != 0)
+    {
+        <MudText Typo="Typo.h3">Your Custom Items</MudText>
+        <br/>
+        <MudTable T="CustomItem" Items="_items">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>View</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>
+                    <MudButton Color="Color.Success" Variant="Variant.Outlined" Href="@($"/item/{context.ItemId}")">
+                        View
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+    else if (_items?.Count == 0)
+    {
+        <MudText Typo="Typo.h3">No items found.</MudText>
+    }
+</MudContainer>
+
+@code {
+
+    private List<CustomItem>? _items;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _items = await Api.GetItemsForUser();
+            StateHasChanged();
+        }
+    }
+
+}

@@ -1,0 +1,70 @@
+﻿@using Compendium.Models
+@using Compendium.Services
+
+@inject AttackService AttackService
+
+<MudDialog DisableSidePadding="true">
+    <DialogContent>
+        <MudContainer>
+            <MudText Typo="Typo.h5">Replaying attack: "@AttackToReplay.Name"</MudText>
+            <MudSelect @bind-SelectedValues="_creaturesToHit" MultiSelection="true" T="Monster" Label="Targeted Creatures" AnchorOrigin="Origin.BottomCenter">
+                @foreach (var c in Creatures)
+                {
+                    <MudSelectItem T="Monster" Value="@c"/>
+                }
+            </MudSelect>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Replay">Replay Attack</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public AttackResult AttackToReplay { get; set; }
+
+    [Parameter]
+    public List<Monster> Creatures { get; set; }
+    
+    [Parameter]
+    public EventCallback<List<Monster>> CreaturesChanged { get; set; }
+
+    [Parameter]
+    public List<AttackResult> Attacks { get; set; }
+    
+    [Parameter]
+    public EventCallback<List<AttackResult>> AttacksChanged { get; set; }
+
+    private IEnumerable<Monster> _creaturesToHit = new HashSet<Monster>();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private async Task Replay()
+    {
+        var newAttack = new List<AttackResult> { AttackService.ReRoll(AttackToReplay, _creaturesToHit.ToList()) };
+        Attacks.AddRange(newAttack);
+        await InvokeAttacks();
+        Creatures = AttackService.DealDamage(Creatures, _creaturesToHit, newAttack, false);
+        await InvokeCreatures();
+        StateHasChanged();
+    }
+    
+    private async Task InvokeAttacks()
+    {
+        await AttacksChanged.InvokeAsync(Attacks);
+    }
+
+    private async Task InvokeCreatures()
+    {
+        await CreaturesChanged.InvokeAsync(Creatures);
+    }
+}

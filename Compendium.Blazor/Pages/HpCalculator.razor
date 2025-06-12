@@ -1,0 +1,56 @@
+﻿@page "/hp"
+@using Compendium.Models
+@using Compendium.Blazor.Shared
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2">
+        D&D HP Tracker
+    </MudText>
+    <MudDivider/>
+    <MudText Typo="Typo.body1">
+        Have a bunch of players that just got hit by a Blue Dragon's lightning breath? Or maybe you just want to keep track of a bunch of monsters' hp.
+    </MudText>
+    <MudText Typo="Typo.body1">
+        This tool aims to help with that. You can add any number of creatures and modify their HP indivudually or in bulk.
+    </MudText>
+</MudContainer>
+<br/>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <HpInput @bind-Creatures="_creatures" @bind-SavingThrow="@_savingThrow" IncludeCreatureAdder="true" IncludeDamageModifiers="true"/>
+        </MudItem>
+        <MudItem xs="12" sm="5">
+            <MudPaper Class="pa-4 mud-height-full">
+                <MudTable Items="_creatures" Breakpoint="Breakpoint.Md">
+                    <HeaderContent>
+                        @if (_savingThrow)
+                        {
+                            <MudTh>Passed?</MudTh>
+                        }
+                        <MudTh>Name</MudTh>
+                        <MudTh>HP</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        @if (_savingThrow)
+                        {
+                            <MudTd>
+                                <MudCheckBox T="bool"  @oninput="() => { context.PassedSavingThrow = !context.PassedSavingThrow; }" @bind-Checked="@context.PassedSavingThrow"/>
+                            </MudTd>
+                        }
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>@context.HitPoints</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+
+    private List<Monster> _creatures = new();
+    private bool _savingThrow;
+
+}

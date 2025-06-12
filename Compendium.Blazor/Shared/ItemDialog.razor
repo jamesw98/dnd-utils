@@ -1,0 +1,30 @@
+﻿@using Compendium.Models
+@inject NavigationManager NavigationManager
+
+<MudDialog DisableSidePadding="true">
+    <DialogContent>
+        <MudContainer Style="max-height: 500px; overflow-y: scroll">
+            <ItemContentComponent DndItem="DndItem"/>    
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="() => { MudDialog.Close(); }">Close</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ViewItemPage">View Dedicated Item Page</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+    
+    [Parameter]
+    public DndItem DndItem { get; set; }
+    
+    [Parameter]
+    public int ItemId { get; set; }
+
+    private void ViewItemPage()
+    {
+        NavigationManager.NavigateTo($"/item/{ItemId}");
+    }
+}

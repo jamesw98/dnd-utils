@@ -1,0 +1,41 @@
+﻿@page "/spell/{SpellId:int}"
+@using Compendium.Models
+@using Compendium.Services
+@using Compendium.Exceptions
+@using Compendium.Blazor.Shared
+
+@inject SearchService SearchService
+
+@if (_spell == null)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+}
+else if (_notFound)
+{
+    <MudText Typo="Typo.h3">Could not find spell</MudText>
+}
+else
+{
+    <SpellContentComponent Spell="_spell"/>
+}
+
+@code {
+    [Parameter]
+    public int SpellId { get; set; }
+
+    private Spell? _spell;
+    private bool _notFound = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _spell = await SearchService.GetSpellForId(SpellId);
+            Console.WriteLine();
+        }
+        catch (NotFoundException)
+        {
+            _notFound = true;
+        }
+    }
+}

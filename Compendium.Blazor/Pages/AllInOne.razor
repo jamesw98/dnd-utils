@@ -1,0 +1,128 @@
+﻿@page "/combat"
+@using Compendium.Blazor.Shared
+@using Compendium.Models
+@using Compendium.Services
+
+@inject AttackService AttackService
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <MudText Typo="Typo.h2">
+        D&D Combat Tracker
+    </MudText>
+    <MudDivider/>
+</MudContainer>
+<br/>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <MudGrid>
+        <MudItem xs="16" sm="7">
+            <MudText Typo="Typo.h4">Inputs</MudText>
+            <MudExpansionPanels MultiExpansion="true">
+                <MudExpansionPanel Text="Creature Creator">
+                    <MonsterInput @bind-Monsters="_creatures"/>
+                </MudExpansionPanel>
+                <MudExpansionPanel Text="Attack Calculator">
+                    <AttackInputs @bind-Attacks="_attacks" CombatManagerLayout="true" @bind-SavingThrow="@_savingThrow" Creatures="_creatures"/>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+        </MudItem>
+        <MudItem xs="16" sm="5">
+            <MudText Typo="Typo.h4">Creatures</MudText>
+            <MudPaper Class="pa-4">
+                <MudTable Items="_creatures" Breakpoint="Breakpoint.Md">
+                    <HeaderContent>
+                        @if (_savingThrow)
+                        {
+                            <MudTh>Passed?</MudTh>
+                        }
+                        <MudTh>Initiative</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>AC</MudTh>
+                        <MudTh>Passive</MudTh>
+                        <MudTh>HP</MudTh>
+                        <MudTh>Max</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        @if (_savingThrow)
+                        {
+                            <MudTd>
+                                <MudCheckBox T="bool" @oninput="() => { context.PassedSavingThrow = !context.PassedSavingThrow; }" @bind-Checked="@context.PassedSavingThrow"/>
+                            </MudTd>
+                        }
+                        <MudTd>@context.Initiative</MudTd>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>@context.ArmorClass</MudTd>
+                        <MudTd>@context.PassivePerception</MudTd>
+                        <MudTd>@context.HitPoints</MudTd>
+                        <MudTd>@context.MaxHitPoints</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+            <br/>
+            <MudText Typo="Typo.h4">Attack History</MudText>
+            <MudPaper Class="pa-4">
+                <MudTable Items="_attacks" Breakpoint="Breakpoint.Md">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        @if (!_savingThrow)
+                        {
+                            <MudTh>Attack Roll</MudTh>
+                        }
+                        <MudTh>Damage Roll</MudTh>
+                        <MudTh>Crit?</MudTh>
+                        <MudTh>Info</MudTh>
+                        <MudTh>Replay</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Name</MudTd>
+                        @if (!_savingThrow)
+                        {
+                            <MudTd>@context.AttackDetail.Total</MudTd>
+                        }
+                        <MudTd>@context.Damange</MudTd>
+                        <MudTd>@(context.Crit ? "Yes" : "No")</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Info" aria-label="info" OnClick="async () => { await OnButtonClicked(context); }"></MudIconButton>
+                        </MudTd>
+                        @* <MudTd> *@
+                        @*     <MudIconButton Icon="@Icons.Material.Outlined.Replay" aria-label="replay" OnClick="async () => { await Replay(context); }"></MudIconButton> *@
+                        @* </MudTd> *@
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<Monster> _creatures = new();
+    private List<AttackResult> _attacks = new();
+    private bool _savingThrow = false;
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    private async Task Replay(AttackResult ar)
+    {
+        var parameters = new DialogParameters
+        {
+            ["AttackToReplay"] = ar,
+            ["Attacks"] = _attacks,
+            ["Creatures"] = _creatures
+        };
+
+        await DialogService.ShowAsync<ReplayAttack>("Replay Attack", parameters);
+    }
+
+    private async Task OnButtonClicked(AttackResult ar)
+    {
+        var message = ar.UnusedAttackDetail != null 
+            ? $"<b>To hit:</b> <br /> <u>{ar.AttackDetail}</u> <br />{ar.UnusedAttackDetail}<br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail}" 
+            : $"<b>To hit:</b> <br /> {ar.AttackDetail} <br /><br /> <b>Damage:</b> <br /> {ar.DamageDetail} <br /> <br /> <b>Targeted Creatures:</b> <br> <br />{string.Join(",", ar.CreaturesTargeted)} <br /> <br /> <b>Hit Creatures:</b> <br> <br />{string.Join(",", ar.CreaturesHit)}";
+
+        await DialogService.ShowMessageBox("Attack Result Info", (MarkupString)message);
+
+        StateHasChanged();
+    }
+
+}

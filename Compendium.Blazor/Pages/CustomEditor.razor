@@ -1,0 +1,66 @@
+@inject ApiUtil Api
+@inject ISnackbar Snackbar
+
+@page "/item-editor"
+
+<AuthorizeView>
+    <NotAuthorized>
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudText Typo="Typo.h2">You must be logged in to use this page.</MudText>
+        </MudContainer>
+    </NotAuthorized>
+    <Authorized>
+        <MudContainer MaxWidth="MaxWidth.Large" style="min-height: 90vh">
+            <MudGrid Class="pa-4" style="height: 100%">
+                <MudItem xs="12" sm="6">
+                    <MarkdownEditor @bind-Value="@_markdownValue" ValueHTMLChanged="@OnMarkdownValueHTMLChanged"/>
+                    <br/>
+                    <div class="d-flex" style="justify-content: center">
+                        <MudTextField @bind-Value="_name" T="string" Label="Name" Class="pr-4"/>
+                        <MudButton Color="Color.Success" Variant="Variant.Outlined" OnClick="CreateItem">Save</MudButton>
+                    </div>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudPaper Class="pa-4 mud-height-full">
+                        <MudText>
+                            @((MarkupString)_markdownHtml)
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private string _name = string.Empty;
+    private string _markdownValue = "## Skim Beeble's Fancy Rock\nTotally not just a weaker Ring of Spell Storing.";
+    private string _markdownHtml;
+
+    Task OnMarkdownValueChanged(string value)
+    {
+        return Task.CompletedTask;
+    }
+
+    Task OnMarkdownValueHTMLChanged(string value)
+    {
+        _markdownHtml = value;
+        return Task.CompletedTask;
+    }
+
+    public async Task CreateItem()
+    {
+        try
+        {
+            await Api.CreateItem(_name, _markdownValue);
+        }
+        catch (ArgumentException e)
+        {
+            Snackbar.Add(e.Message, Severity.Warning);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("An unexpected error occured.");
+        }
+    }
+}

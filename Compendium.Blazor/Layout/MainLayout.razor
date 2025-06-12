@@ -1,0 +1,46 @@
+﻿@using Compendium.Blazor.Shared
+
+@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="true"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+<MudPopoverProvider />
+
+<MudLayout>
+    <MudAppBar>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+        <MudSpacer/>
+        <AccessControl/>
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_open" >
+        <MudNavMenu>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" Href="">Home</MudNavLink>
+            <MudNavGroup Title="Spells" Expanded="true">
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ElectricBolt" Href="spells">Spell Search</MudNavLink>
+                @* <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AutoFixHigh" Href="custom-spells">My Spells</MudNavLink> *@
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LibraryBooks" Href="spellbooks">My Spellbooks</MudNavLink>
+            </MudNavGroup>
+            <MudNavGroup Title="Items" Expanded="true">
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Search" Href="items">Item Search</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Diamond" Href="item-editor">Create an Item</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Diamond" Href="custom-items">My Items</MudNavLink>
+            </MudNavGroup>
+            <MudNavGroup Title="DM Utils">
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Construction" Href="">Coming Soon</MudNavLink>
+            </MudNavGroup>
+        </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _open = false;
+    
+    private void ToggleDrawer()
+    {
+        _open = !_open;
+    }
+}

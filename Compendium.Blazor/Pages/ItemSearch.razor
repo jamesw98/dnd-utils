@@ -148,7 +148,7 @@
     private async Task ViewItem(string name, int itemId)
     {
         var item = await SearchService.GetItem(name);
-        var parameters = new DialogParameters { { "Item", item }, { "itemId", itemId } };
+        var parameters = new DialogParameters { { "DndItem", item }, { "itemId", itemId } };
         var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
 
         await DialogService.ShowAsync<ItemDialog>("", parameters, options);

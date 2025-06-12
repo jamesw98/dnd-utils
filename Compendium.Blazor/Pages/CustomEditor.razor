@@ -2,11 +2,12 @@
 @inject ISnackbar Snackbar
 
 @page "/item-editor"
+@using Compendium.Blazor.Shared
 
 <AuthorizeView>
     <NotAuthorized>
         <MudContainer MaxWidth="MaxWidth.Large">
-            <MudText Typo="Typo.h2">You must be logged in to use this page.</MudText>
+            <ForbiddenMessage/>
         </MudContainer>
     </NotAuthorized>
     <Authorized>

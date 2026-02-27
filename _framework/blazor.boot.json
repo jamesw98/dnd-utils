@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Compendium.Blazor",
   "resources": {
-    "hash": "sha256-sYi5EIJDCp0GP8xX+W/UKXnKR5L9rDbTFj2m13CYlok=",
+    "hash": "sha256-PkMJ7Z5sAceaNSEmRMwVugWvqViKi9pYxEQqO66KUi8=",
     "fingerprinting": {
       "Auth0.Core.ipyhqku5mc.wasm": "Auth0.Core.wasm",
       "Blazored.SessionStorage.34xr2ein7y.wasm": "Blazored.SessionStorage.wasm",
@@ -82,7 +82,7 @@
       "System.f0t8bkq7p2.wasm": "System.wasm",
       "netstandard.iyr1o2mo3b.wasm": "netstandard.wasm",
       "System.Private.CoreLib.32nsckbiyj.wasm": "System.Private.CoreLib.wasm",
-      "Compendium.Blazor.jzaef7qgl2.wasm": "Compendium.Blazor.wasm",
+      "Compendium.Blazor.nm8u938p4a.wasm": "Compendium.Blazor.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.6m0hb3g78a.js": "dotnet.native.js",
       "dotnet.native.zw8ib5pvmp.wasm": "dotnet.native.wasm",
@@ -187,7 +187,7 @@
       "System.Xml.Linq.l97zw45ven.wasm": "sha256-ic924j/6vmxy4hqjq0MTltBv/DZBueMze3Y2LdHCVUQ=",
       "System.f0t8bkq7p2.wasm": "sha256-319B7WIXJ7ZD6SZ1l7es3CoglOLgv5lKWx0Ew9mli1c=",
       "netstandard.iyr1o2mo3b.wasm": "sha256-ygP+eqtuUfFGp9xQzn1Yj10q4TEGVSUkFrHVkdaWhto=",
-      "Compendium.Blazor.jzaef7qgl2.wasm": "sha256-H7qdtkrVa2l3ZRqVIkLnECTYg7PD9uginZ2XjRi21AQ="
+      "Compendium.Blazor.nm8u938p4a.wasm": "sha256-L9zUfWuR9X8BdquaqaWr1IJ/JmGE59c2fD+MzEUY+zs="
     }
   },
   "cacheBootResources": true,

@@ -11,6 +11,7 @@ public static class Methods
     {
         return query.ToLower()
             .Replace(": ", "-")
+            .Replace(",", "")
             .Replace(' ', '-')
             .Replace("/", "-");
     }

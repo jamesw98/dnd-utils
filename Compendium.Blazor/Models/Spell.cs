@@ -1,7 +1,10 @@
-﻿namespace Compendium.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace Compendium.Models;
 
 public class Spell
 {
+    [JsonPropertyName("Id")]
     public int SpellId { get; set; }
     public string Name { get; set; }
     public string School { get; set; }
